@@ -1,0 +1,92 @@
+# Organizer Checklist — {{PROJECT_NAME}}
+
+> Completá esto **una vez**, antes de compartir el repo con los teams. ~5–10 min.
+> Cuando termines, podés borrar este archivo (o dejarlo como historial).
+
+## 1. Completar `workshop.yaml`
+
+Quedan 4 campos pendientes después del bootstrap:
+
+- [ ] `shared_infra.apis_external[]` — APIs externas (OpenAI, Stripe, etc.).
+      Cada entry: `{ id, env_var, base_url, owner, access: [team-id, ...] }`.
+
+      **Importante (modelo two-layer):** si `access` está vacío u omitido →
+      la var es **global** y va en `.env.shared.example` (todos los teams).
+      Si `access` lista teams → la var es **team-specific** y va en
+      `apps/<team>/.env.local.example` de cada team listado.
+
+- [ ] `shared_infra.storage[]` — buckets/blobs. Si nadie usa, dejá `[]` y skipeá.
+- [ ] `teams[].members` — handles GitHub (`["@user1", "@user2"]`).
+- [ ] `teams[].domain` — dominio funcional (ej. `checkout`, `search`).
+
+> UI tokens: `packages/design-system/tokens/` ya tiene defaults razonables.
+> Editá sólo si el workshop necesita branding propio.
+
+Validar:
+
+```bash
+bash scripts/doctor.sh workshop validate workshop.yaml
+bash scripts/doctor.sh   # warns sobre los campos pendientes
+```
+
+## 2. Completar los archivos `.env` de ejemplo (modelo two-layer)
+
+Hay **dos capas** de configuración. El mapeo lo decide
+`workshop.yaml.shared_infra.apis_external[].access`.
+
+### 2.a. Globales — `.env.shared.example` (commiteado, raíz del monorepo)
+
+Vars que TODOS los teams necesitan. Ya viene con defaults razonables:
+- `DATABASE_URL`, `NODE_ENV`, `SHELL_PORT`, `LOG_LEVEL`, `CORRELATION_HEADER`, `MOCKS`.
+- Cualquier `apis_external[]` con `access: []` (vacío) o sin `access` declarado.
+
+- [ ] Verificar que las vars listadas matcheen las vars realmente globales
+      en tu `workshop.yaml`.
+- [ ] Agregar las que falten (cada `apis_external[].env_var` con
+      `access` vacío).
+
+### 2.b. Team-specific — `apps/<team>/.env.local.example` (commiteado, por team)
+
+Vars que SÓLO un team (o un subset) usa. Ejemplos:
+- `apps/checkout/.env.local.example`: `STRIPE_API_KEY=` (sólo checkout).
+- `apps/search/.env.local.example`: `OPENAI_API_KEY=` (sólo search).
+- `apps/recs/.env.local.example`: `OPENAI_API_KEY=` (también recs).
+
+Para cada team en `apps/{{TEAMS_LIST}}/`:
+- [ ] Editar `.env.local.example` listando las vars de
+      `apis_external[]` donde el team está en `access`.
+- [ ] Si el team no tiene vars team-specific, dejar el archivo con sólo el
+      comentario placeholder (no borrarlo: mantiene el contrato declarativo).
+
+> `.env.shared.example` y `apps/<team>/.env.local.example` se commitean.
+> `.env.shared` y `apps/<team>/.env.local` están gitignored.
+> Detalle del modelo: `docs/workshop/secrets-strategy.md`.
+
+## 3. Completar `apps/<team>/CLAUDE.md`
+
+Cada team tiene un `apps/{{TEAMS_LIST}}/CLAUDE.md` con `TODO-domain` y
+`TODO-members`. Reemplazar por el dominio funcional y miembros del team.
+
+## 4. (Opcional) Publicar el repo
+
+```bash
+gh repo create <org>/{{PROJECT_NAME}} --public --source . --push
+```
+
+Compartí la URL en el chat del hackathon. Cada dev se suma con:
+
+```bash
+git clone <url> && cd {{PROJECT_NAME}} && bash scripts/join.sh --as <team-id>
+```
+
+## 5. Verificación final
+
+```bash
+bash scripts/doctor.sh
+```
+
+Esperado: 0 warns sobre `workshop.yaml` + env files presentes en cada team.
+
+---
+
+Detalle de cada decisión cross-cutting (DB, secrets, versioning, deployment) en `docs/workshop/`.

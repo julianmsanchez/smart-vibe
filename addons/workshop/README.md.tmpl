@@ -1,0 +1,49 @@
+# {{PROJECT_NAME}}
+
+> Workshop multi-team generado con [smart-vibe](https://github.com/julianmsanchez/smart-vibe).
+> Modo: `vibe`. Stack: Turborepo + pnpm.
+
+## Empezá acá
+
+**Si sos el organizer:** abrí [`ORGANIZER-CHECKLIST.md`](./ORGANIZER-CHECKLIST.md)
+y completá los 4 pasos (~5–10 min). Después podés compartir el repo con los teams.
+
+**Si sos un team developer (te invitaron al repo):**
+
+```bash
+bash scripts/join.sh --as <team-id>
+```
+
+## Estructura
+
+- `workshop.yaml` — SSOT cross-cutting (teams, infra compartida, UI, secrets).
+- `apps/shell/` — Next.js host que monta los teams.
+- `apps/<team>/` — un Express+TS por team (con su propio `CLAUDE.md` y `.env.local.example`).
+- `packages/` — design-system, types, auth, api-contracts, infra-contracts, fixtures, config.
+- `docs/workshop/` — docs operacionales (strategies, conceptos, contratos).
+
+## Configuración (modelo two-layer)
+
+- **Globales** (todos los teams): `.env.shared.example` → llenar como `.env.shared` (gitignored).
+- **Team-specific**: `apps/<team>/.env.local.example` → llenar como `apps/<team>/.env.local` (gitignored).
+
+El mapeo de cada var a una capa lo decide
+`workshop.yaml.shared_infra.apis_external[].access`. Detalle:
+[`docs/workshop/secrets-strategy.md`](./docs/workshop/secrets-strategy.md).
+
+## Comandos clave
+
+```bash
+{{PACKAGE_MANAGER}} install
+{{PACKAGE_MANAGER}} turbo dev --filter=shell --filter=apps/<team-id>
+bash scripts/doctor.sh                      # estado del workshop
+bash scripts/doctor.sh workshop validate    # valida workshop.yaml
+```
+
+## Plugin Claude Code
+
+`/smart-workshop status` · `/smart-workshop integration-check` · `/smart-workshop add-team <id>`
+
+## Modo
+
+`vibe` — prototipado con guardrails mínimos. Cuando el workshop madure, correr `/smart-graduate`.
