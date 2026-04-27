@@ -41,10 +41,10 @@ Crear archivos `.md` por tema. Sugeridos según vayas necesitándolos:
 - **URL:** https://vercel.com/juan-team
 - **Billing:** card ****1234
 
-## Supabase
+## DB Provider
 - **Owner:** Juan
 - **Plan:** Free
-- **URL:** https://supabase.com/dashboard/project/...
+- **URL:** https://example.com/dashboard/project/...
 - **Notas:** free tier hasta 50K rows/month
 ```
 

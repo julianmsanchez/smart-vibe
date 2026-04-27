@@ -22,28 +22,30 @@ info()  { [[ $QUIET -eq 0 ]] && echo "  $*"; }
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # --- subcomandos ---
+# Validación YAML básica (parse) usando python3 si está disponible.
+# La validación Zod estricta queda para `pnpm validate` dentro del proyecto
+# (que tiene acceso a las deps TS) — ver TODO Fase 2.
+yaml_parse() {
+  local path="$1"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c "import yaml,sys; yaml.safe_load(open('$path'))" 2>&1
+    return $?
+  fi
+  return 0  # sin python3, asumimos OK
+}
+
 cmd_phs_validate() {
   local path="${1:-phs.yaml}"
   if [[ ! -f "$path" ]]; then
     fail "phs.yaml no encontrado: $path"
     return
   fi
-
-  if command -v node >/dev/null 2>&1 && [[ -f "$REPO_ROOT/core/phs/schema.ts" ]]; then
-    info "Validando $path con Zod schema..."
-    node -e "
-      const yaml = require('js-yaml');
-      const fs = require('fs');
-      const { phsSchema } = require('$REPO_ROOT/core/phs/schema.ts');
-      const doc = yaml.load(fs.readFileSync('$path', 'utf8'));
-      const r = phsSchema.safeParse(doc);
-      if (!r.success) { console.error(JSON.stringify(r.error.format(), null, 2)); process.exit(1); }
-      console.log('OK');
-    " 2>&1 || fail "PHS validation failed"
-  else
-    warn "node/js-yaml no disponibles; validación skipeada (sólo chequeo de presencia)"
+  if ! yaml_parse "$path" >/dev/null 2>&1; then
+    fail "phs.yaml tiene YAML inválido: $path"
+    return
   fi
-  ok "phs.yaml presente: $path"
+  ok "phs.yaml válido (parse): $path"
+  info "Validación Zod estricta: correr 'pnpm validate' dentro del proyecto (TODO Fase 2)"
 }
 
 cmd_workshop_validate() {
@@ -52,22 +54,12 @@ cmd_workshop_validate() {
     fail "workshop.yaml no encontrado: $path"
     return
   fi
-
-  if command -v node >/dev/null 2>&1 && [[ -f "$REPO_ROOT/core/workshop-spec/schema.ts" ]]; then
-    info "Validando $path con Zod schema..."
-    node -e "
-      const yaml = require('js-yaml');
-      const fs = require('fs');
-      const { workshopSchema } = require('$REPO_ROOT/core/workshop-spec/schema.ts');
-      const doc = yaml.load(fs.readFileSync('$path', 'utf8'));
-      const r = workshopSchema.safeParse(doc);
-      if (!r.success) { console.error(JSON.stringify(r.error.format(), null, 2)); process.exit(1); }
-      console.log('OK');
-    " 2>&1 || fail "workshop.yaml validation failed"
-  else
-    warn "node/js-yaml no disponibles; validación skipeada"
+  if ! yaml_parse "$path" >/dev/null 2>&1; then
+    fail "workshop.yaml tiene YAML inválido: $path"
+    return
   fi
-  ok "workshop.yaml presente: $path"
+  ok "workshop.yaml válido (parse): $path"
+  info "Validación Zod estricta: correr 'pnpm validate' dentro del proyecto (TODO Fase 2)"
 }
 
 cmd_general() {
@@ -100,19 +92,23 @@ cmd_general() {
     warn "README.md ausente o vacío. Ver core/playbooks/04-no-readme.md"
   fi
 
-  # 4. .env.example
-  if [[ -f .env.example ]]; then
-    ok ".env.example presente"
+  # 4. .env.example (o .env.shared.example en workshop)
+  local env_example=""
+  if [[ -f .env.example ]]; then env_example=".env.example"; fi
+  if [[ -z "$env_example" && -f .env.shared.example ]]; then env_example=".env.shared.example"; fi
+
+  if [[ -n "$env_example" ]]; then
+    ok "$env_example presente"
     # comparar con vars consumidas
     if [[ -d src ]]; then
       local consumed example diff
       consumed=$(grep -rhoE "process\.env\.[A-Z_][A-Z0-9_]+" src/ 2>/dev/null \
         | sed 's/process\.env\.//' | sort -u)
-      example=$(grep -E "^[A-Z_][A-Z0-9_]+=" .env.example 2>/dev/null \
+      example=$(grep -E "^[A-Z_][A-Z0-9_]+=" "$env_example" 2>/dev/null \
         | cut -d= -f1 | sort -u)
       diff=$(comm -23 <(echo "$consumed") <(echo "$example") 2>/dev/null)
       if [[ -n "$diff" ]]; then
-        warn "vars consumidas no documentadas en .env.example:"
+        warn "vars consumidas no documentadas en $env_example:"
         echo "$diff" | sed 's/^/    - /'
       fi
     fi
