@@ -1,0 +1,90 @@
+# Team communication — `{{PROJECT_NAME}}`
+
+> Cómo los teams se hablan entre sí (técnicamente). Para coordinación humana, leer también `integration-contract.md`.
+
+## MVP: HTTP via api-contracts
+
+Único canal sync soportado en v0.1.0.
+
+```typescript
+// Team A consume team B
+import { CheckoutCreateOrderResponse } from '@workshop/api-contracts';
+
+const res = await fetch('/api/checkout/orders', {
+  method: 'POST',
+  headers: {
+    'content-type': 'application/json',
+    'x-correlation-id': req.headers['x-correlation-id'] as string,
+  },
+  body: JSON.stringify({ userId, items }),
+});
+
+const data = CheckoutCreateOrderResponse.parse(await res.json());
+```
+
+Reglas:
+
+1. Validar request con Zod.
+2. Validar response con Zod (al menos en dev).
+3. Propagar `correlation-id` siempre.
+4. Manejar errores explícitamente (no asumir 200).
+
+## Async (no soportado en MVP)
+
+Si necesitás eventos:
+
+### Workaround temporal: tabla compartida
+
+```sql
+CREATE TABLE workshop_events (
+  id uuid PRIMARY KEY,
+  team_origin text NOT NULL,
+  type text NOT NULL,
+  payload jsonb NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  consumed_by text[]  -- teams que ya lo procesaron
+);
+```
+
+Team productor inserta, team consumidor pollea cada N segundos.
+
+Workaround viable para hackathon, NO para producción.
+
+### Solución real: Fase 2 / celeru-pro
+
+`packages/events/` con bus pluggable (Redis Streams / Kafka / SNS+SQS). Schemas tipados (Zod), publish/subscribe API. Out of scope v0.1.0.
+
+## Auth entre teams
+
+Server-to-server: usar `INTERNAL_API_TOKEN` (var compartida en `.env.shared`). Validar en cada team con middleware.
+
+User session: propagar el JWT/cookie del usuario via `Authorization` header. El shell lo emite, los teams lo validan con `@workshop/auth`.
+
+## Resilience
+
+En MVP no hay circuit breaker / retry / backoff compartido. Si team A llama a team B y B está caído, A debe manejarlo:
+
+```typescript
+try {
+  const res = await callTeamB();
+  // ...
+} catch (err) {
+  logger.error('team-b unavailable', { err });
+  return res.status(503).json({ error: 'dependency unavailable' });
+}
+```
+
+## Patrones
+
+| Patrón | Cuándo | Cómo |
+|---|---|---|
+| Sync request/response | A necesita una respuesta de B ahora | HTTP via api-contracts |
+| Fire-and-forget | A notifica algo a B, no le importa la respuesta | HTTP POST con timeout corto + log si falla |
+| Eventual consistency | Múltiples teams reaccionan a un evento | Tabla `workshop_events` (workaround) o Fase 2 |
+| Compartir data | A y B leen el mismo recurso | DB compartida con team_id (si la strategy lo permite) o B expone GET en api-contracts |
+
+## TODO Fase 2
+
+- `packages/events/` — event bus tipado.
+- `packages/api-clients/` — typed clients autogenerados desde api-contracts (con retries y circuit breaker).
+- Distributed tracing OpenTelemetry.

@@ -1,0 +1,86 @@
+# Observability — `{{PROJECT_NAME}}`
+
+> Logs, métricas y trazas cross-team sin reinventar nada por team.
+
+## Capas
+
+| Capa | Modo vibe | Modo graduating | Modo production |
+|---|---|---|---|
+| Logging | console JSON con correlation-id | + ship a destino central | + retention + alertas |
+| Métricas | ninguna | Prometheus | + dashboards + SLO |
+| Tracing | ninguna | OpenTelemetry opt-in | obligatorio |
+
+## Logging (modo vibe)
+
+Stack:
+
+- Logger base: `@<project>/<addon-node-ts>/services/logger.service` (extraído de `addons/node-ts/`).
+- Formato: JSON line con `{ timestamp, level, message, correlationId, teamId, ...rest }`.
+- Output: stdout (default). Configurable a CloudWatch / Datadog en graduating.
+
+### Correlation ID
+
+Header `x-correlation-id` (declarado en `workshop.yaml.shared_infra.observability.correlation_header`).
+
+Flujo:
+
+1. Browser/cliente NO setea el header (queda en blanco).
+2. El shell genera un UUID al primer request si no viene.
+3. El shell propaga el header a cada team request.
+4. Cada team adjunta `correlationId` en TODOS sus logs (via `withLogContext` / `AsyncLocalStorage`).
+5. En graduating, el destino central permite filtrar por `correlationId` y ver TODA la traza cross-team.
+
+Code path (cada team):
+
+```typescript
+import { logger, withLogContext } from '@<project>/<node-ts-addon>';
+
+app.use((req, _res, next) => {
+  const correlationId = req.header('x-correlation-id') ?? crypto.randomUUID();
+  withLogContext({ correlationId, teamId: 'team-checkout' }, () => next());
+});
+
+// Más adelante, en cualquier handler:
+logger.info('order created', { orderId });
+// → output: { ..., correlationId: "...", teamId: "team-checkout", orderId: "..." }
+```
+
+## Logging — qué loguear y qué NO
+
+**Loguear:**
+- Inicio/fin de cada request (status, latencia).
+- Errores con stack.
+- Side effects significativos (write a DB, llamada externa).
+
+**NO loguear:**
+- Secretos (API keys, tokens, passwords).
+- PII en plano (emails, DNIs). Hash o redact.
+- Bodies grandes. Truncar.
+
+## Métricas (modo graduating)
+
+Activar `workshop.yaml.shared_infra.observability.metrics_enabled: true`. El shell expone `/metrics` agregado y cada team expone su `/metrics` interno.
+
+Endpoint del addon `node-ts` ya scaffoldea esto (`observability/prometheus.yml.tmpl`).
+
+## Tracing (modo production)
+
+OpenTelemetry. Cada team instrumenta sus handlers; el shell exporta a Jaeger/Tempo/Honeycomb.
+
+Out of scope para v0.1.0.
+
+## Alertas
+
+Modo graduating mínimo:
+
+- Error rate > 1% durante 5 min.
+- p95 latency > 1s durante 10 min.
+- 5xx > N en 1 min.
+
+Owner: shell. Cada team puede agregar las suyas en su namespace.
+
+## TODO Fase 2
+
+- Prometheus federation entre shell y teams.
+- OpenTelemetry SDK preinstalado en addon `node-ts`.
+- Dashboards templates compartidos (Grafana JSON ya existe en `addons/node-ts/observability/grafana/`).

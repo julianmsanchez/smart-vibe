@@ -1,0 +1,84 @@
+# Data strategy — `{{PROJECT_NAME}}`
+
+> Cómo los teams comparten DB sin pisarse.
+
+## Tres estrategias
+
+Declarar en `workshop.yaml.shared_infra.databases.strategy`:
+
+| Strategy | Quién la elige | Pros | Contras |
+|---|---|---|---|
+| `shared-schema-isolated-rows` | Hackathons / multi-product simple | Una sola DB, una sola conn pool, joins fáciles | Riesgo de leak entre teams si falta WHERE |
+| `schema-per-team` | Corporate-squads | Aislación lógica fuerte, migrations independientes | Cross-team queries imposibles sin DB links |
+| `db-per-team` | Teams con datos sensibles | Aislación física | Costos altos, coordinación de migraciones |
+
+**Default en modo vibe:** `shared-schema-isolated-rows` con RLS opcional.
+
+## shared-schema-isolated-rows
+
+### Convención
+
+Cada tabla compartida tiene una columna `team_id`. Cada team filtra siempre por `team_id` en sus queries.
+
+```sql
+CREATE TABLE orders (
+  id uuid PRIMARY KEY,
+  team_id text NOT NULL,
+  -- ...
+);
+```
+
+### RLS (recomendado para corporate-squads, opcional en hackathon)
+
+Activar Row-Level Security en Postgres:
+
+```sql
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY team_isolation ON orders
+  USING (team_id = current_setting('app.current_team', true));
+```
+
+El shell setea `SET app.current_team = '<team_id>'` por request, identificando al team con el `api_prefix` que matchea.
+
+## schema-per-team
+
+```sql
+CREATE SCHEMA team_checkout;
+CREATE SCHEMA team_search;
+
+-- migrations:
+-- team_checkout/0001_create_orders.sql
+-- team_search/0001_create_index.sql
+```
+
+Cada team es dueño de su schema. Cross-reads requieren contrato HTTP via `api-contracts`, NO SQL JOINs.
+
+## Migrations
+
+**Owner:** shell (declarado en `workshop.yaml.shared_infra.databases.migrations_owner`).
+
+- Cada team crea SQLs en `apps/<team>/sql/migrations/`.
+- El shell consolida en `apps/shell/sql/migrations/` con prefijo `<team>_<timestamp>_<name>.sql`.
+- Migrations corren en orden lexicográfico al `pnpm db:migrate`.
+
+En modo vibe: los teams pueden correr migrations propias en dev (rápido). Para deploy a un ambiente compartido, **siempre** vía shell.
+
+## Backups
+
+Modo vibe: opcional. Modo graduating: diarios, retention 30 días, owner = shell.
+
+## Cross-team reads
+
+Prohibido SQL directo. Si team A necesita data de team B:
+
+1. Team B publica un endpoint en `api-contracts`.
+2. Team A lo consume via HTTP.
+
+Justificación: si team B refactoriza su schema, team A no se rompe.
+
+## TODO Fase 2
+
+- ORM compartido opcional (Prisma / Drizzle).
+- Migration runner con dry-run.
+- Soft-delete pattern compartido.

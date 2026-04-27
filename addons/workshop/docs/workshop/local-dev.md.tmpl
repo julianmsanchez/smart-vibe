@@ -1,0 +1,97 @@
+# Local dev DX — `{{PROJECT_NAME}}`
+
+> Cómo arrancar el workshop completo o un solo team localmente.
+
+## Setup inicial (una sola vez)
+
+```bash
+git clone <repo>
+cd <repo>
+
+# Secretos compartidos
+cp .env.shared.example .env.shared
+# pedir valores reales por canal seguro
+
+# Deps
+pnpm install
+
+# DB local (si aplica)
+docker compose up -d postgres   # opcional
+pnpm db:migrate                  # corre migrations consolidadas del shell
+pnpm db:seed                     # opcional, datos de @workshop/fixtures
+```
+
+## Arrancar todo
+
+```bash
+pnpm turbo dev
+```
+
+Levanta shell + todos los teams en paralelo. Cada uno en su puerto:
+
+- shell: 3000
+- team-1: 3001
+- team-2: 3002
+- ...
+
+Turbo cachea builds entre packages compartidos.
+
+## Arrancar solo un team + shell
+
+```bash
+pnpm turbo dev --filter=shell --filter=team-checkout
+```
+
+Útil cuando estás trabajando solo en un team y no querés gastar CPU.
+
+## Arrancar con mocks (sin backends arriba)
+
+```bash
+MOCKS=true pnpm turbo dev --filter=shell
+```
+
+El shell levanta con MSW handlers de `@workshop/fixtures/msw-handlers`. Cualquier request al `api_prefix` de un team es interceptado.
+
+## Comandos útiles por package
+
+```bash
+# Typecheck recursivo
+pnpm -r typecheck
+
+# Lint recursivo
+pnpm -r lint
+
+# Test de un solo package
+pnpm --filter @workshop/api-contracts test
+
+# Build de un team específico
+pnpm turbo build --filter=team-checkout
+```
+
+## Debugging cross-team
+
+Cada team loguea con `correlationId`. Para seguir una request:
+
+1. Abrir devtools en el shell, copiar el `x-correlation-id` del request.
+2. `pnpm logs | grep <correlation-id>` (en cada team o en stdout agregado).
+
+## Hot reload
+
+- Cambios en `apps/shell/`: Next.js hot reload, instantáneo.
+- Cambios en `apps/team-*/`: hot reload del proceso del team.
+- Cambios en `packages/*/`: TS rebuilds + consumidores reaccionan (TS server reload). A veces hace falta reiniciar el dev server del consumidor.
+
+## Issues comunes
+
+| Síntoma | Causa | Fix |
+|---|---|---|
+| `Cannot find module '@workshop/...'` | pnpm install no corrió tras agregar package | `pnpm install` |
+| Tipo no actualiza en team al cambiar package | TS server cacheado | Reload window (VS Code: Cmd+Shift+P → "Reload Window") |
+| Puerto ocupado | Otro team arriba | `lsof -i :30XX && kill <pid>` |
+| MSW no intercepta | Service worker no registrado | Verificar `apps/shell/public/mockServiceWorker.js` |
+
+## TODO Fase 2
+
+- `scripts/start-team.sh <team>` con env auto-cargado.
+- Devcontainer / nix shell compartido.
+- Remote Turbo cache.

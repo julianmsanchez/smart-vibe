@@ -1,0 +1,74 @@
+# Deployment choreography — `{{PROJECT_NAME}}`
+
+> Cómo el workshop deploya. MVP intencionalmente simple.
+
+## Strategy: `independent-per-team`
+
+Declarado en `workshop.yaml.ci_cd.deployment_strategy`.
+
+- Cada team deploya independiente al mergear a `main`.
+- El shell deploya cuando uno de sus archivos (o un package compartido) cambia.
+- No hay coordinación temporal entre deploys (no "release trains").
+
+## Por qué no orchestrated
+
+En modo vibe, ningún workshop tiene tráfico real. Coordinar deploys es overhead sin valor. Si un team rompe a otro, se entera por el integration-check de CI o por el otro team al rato.
+
+## Pipeline (per team)
+
+```
+PR → CI (lint, typecheck, test, build) → Review → Merge to main
+                                                       ↓
+                                            CD (deploy team-X to <env>)
+```
+
+Cada team tiene su `apps/<team>/Dockerfile` (o config equivalente). El shell tiene el suyo.
+
+## Targets soportados (templates)
+
+| Target | Comando | Notas |
+|---|---|---|
+| Vercel | `vercel deploy --prod` | Default para shell Next.js |
+| Fly | `fly deploy` | Bueno para teams stateful |
+| Render | git push automático | Cero config |
+| Railway | git push automático | Cero config |
+| AWS Lambda | template comentado | Activar manualmente |
+
+Modo vibe: el template `addons/node-ts/.github/workflows/deploy.yml.tmpl` viene **desactivado** (`if: false`). Activar al deployar por primera vez.
+
+## Rollback
+
+**Owner:** shell (declarado en `workshop.yaml.ci_cd.rollback_owner`).
+
+Mecanismo:
+
+1. Identificar el commit anterior bueno.
+2. Re-deploy ese commit. (Vercel/Render permiten re-promote desde UI.)
+3. Si fue una migración de DB, correr `pnpm db:rollback` (cuando exista — TODO).
+
+## Integration check
+
+`addons/workshop/.github/workflows/integration-check.yml.tmpl` corre en cada PR:
+
+- Valida `workshop.yaml` schema.
+- Typecheck recursivo (rompe si un team consume un schema obsoleto de otro team).
+- Test del shell con todos los teams compilando.
+
+Sin integration-check verde, no se mergea.
+
+## Environments
+
+Modo vibe: `dev` (local) + `prod` (target del pipeline). Listo.
+
+Modo graduating: agregar `staging`. Promote manual desde staging a prod.
+
+## Secretos en CI
+
+Inyectados desde GitHub Secrets (modo vibe) o desde Vault (modo graduating). NO commitear `.env.shared` con valores reales.
+
+## TODO Fase 2
+
+- Coordinated releases para corporate-squads (release train).
+- Canary deployments per team.
+- Auto-rollback en errors > umbral.
+- IaC compartido (Terraform/CDK module por team).

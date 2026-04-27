@@ -1,0 +1,104 @@
+# UI compartida — `{{PROJECT_NAME}}`
+
+> Cómo el shell monta a los teams y cómo los teams pintan consistente. Complemento operativo de `shared-design-tokens.md`.
+
+## Routing
+
+El shell Next.js monta cada team en una ruta declarada en `workshop.yaml.shell.mounts_teams_at` (default: `/{team_id}`).
+
+Tres opciones para el rendering:
+
+### 1. iframe (MVP, simple)
+
+```tsx
+// apps/shell/src/app/[teamId]/page.tsx
+export default function TeamPage({ params }) {
+  return <iframe src={`http://localhost:30${params.teamId}`} className="w-full h-screen" />;
+}
+```
+
+Pros: cero coupling. Contras: navegación rara, no comparte session client-side.
+
+### 2. Module Federation (graduating)
+
+Cada team builda como remote, el shell los carga dinámicamente. Requiere config Webpack/rspack.
+
+### 3. Monolitic Next.js (single-process)
+
+Cada team es un set de routes dentro del mismo Next.js. Comparten provider tree pero los teams pierden independencia de deploy.
+
+**Default en modo vibe:** opción 1 (iframe).
+
+## ThemeProvider
+
+Único, en el shell:
+
+```tsx
+// apps/shell/src/app/layout.tsx
+import { ThemeProvider } from '@workshop/design-system/theme';
+
+export default function Layout({ children }) {
+  return <html><body><ThemeProvider>{children}</ThemeProvider></body></html>;
+}
+```
+
+Cada team usa `useTheme()` o importa tokens directamente.
+
+## Header / Layout compartido
+
+Recomendación: el shell renderea un header común con:
+
+- Logo del workshop.
+- Nav con links a cada team activo (leído de `workshop.yaml.teams[]`).
+- User menu (si hay auth, ver `@workshop/auth`).
+
+Cada team renderea **solamente** su contenido, no su propio header. Esto evita doble-header.
+
+## Override por team
+
+Si un team necesita una variación visual local, **componer** en lugar de mutar:
+
+```tsx
+// apps/team-checkout/components/CheckoutCard.tsx
+import { useTheme } from '@workshop/design-system/theme';
+
+export function CheckoutCard({ children }) {
+  const t = useTheme();
+  return (
+    <div style={{ background: t.colors.surface, padding: t.spacing.lg, borderRadius: 999 }}>
+      {children}
+    </div>
+  );
+}
+```
+
+Está bien componer. NO está bien:
+
+- Mutar el objeto `tokens` en runtime.
+- Instanciar otro `ThemeProvider` para "ajustar" colores globales (sólo OK para Storybook).
+- Hardcodear hex codes que duplican tokens existentes.
+
+## Assets
+
+`packages/design-system/assets/` se sirve desde el shell. Cada team referencia con path:
+
+```tsx
+<img src="/assets/logo/light.svg" alt="..." />
+```
+
+(El shell tiene `next.config` que copia los assets a `public/assets/` en build.)
+
+## Política de cambios
+
+Resumen (detalle en `shared-design-tokens.md`):
+
+- Agregar token / componente: cualquier team via PR.
+- Cambiar token / API existente: PR atómico que actualiza a todos los consumidores.
+- Override local: composición en el team, nunca mutación del package compartido.
+
+## TODO Fase 2
+
+- Module Federation setup template.
+- Storybook compartido.
+- Dark mode tokens.
+- White-label support (override `ThemeProvider` por tenant).

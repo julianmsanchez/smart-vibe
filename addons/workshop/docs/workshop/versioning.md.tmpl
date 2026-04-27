@@ -1,0 +1,81 @@
+# Versioning interno — `{{PROJECT_NAME}}`
+
+> Cómo versionamos los packages compartidos del workshop sin pelearnos.
+
+## Estrategia: `workspace:*`
+
+Todos los packages internos (`@workshop/*`) usan `workspace:*` en lugar de SemVer:
+
+```json
+{
+  "dependencies": {
+    "@workshop/api-contracts": "workspace:*"
+  }
+}
+```
+
+Significado: "siempre la versión local del monorepo". pnpm resuelve linkando en sitio.
+
+**Por qué no SemVer interno:**
+- Es overhead burocrático que no agrega valor para teams co-localizados.
+- Pretender que `1.2.3` significa algo cuando no se publican releases es teatro.
+- Cuando un package madura y necesita SemVer real, entonces se publica a npm (Fase 2 / celeru-pro).
+
+## Política de breaking changes
+
+**Regla:** PR atómico que toca el package compartido **y** todos los consumidores. Si TS rompe en otro team, el PR no mergea hasta arreglarlo.
+
+### Caso 1: cambio breaking, todos disponibles
+
+PR único. Toca:
+- `packages/<x>/` con el cambio.
+- `apps/team-1/`, `apps/team-2/`, ... con la migración.
+
+CI corre `pnpm typecheck` en todo el monorepo. Si TS rompe, no mergea.
+
+### Caso 2: cambio breaking, otro team está mid-flight
+
+No bloquear. **Versionar adentro del schema:**
+
+```typescript
+// Antes
+export const CheckoutCreateOrderRequest = z.object({ /* v1 */ });
+
+// Después: agregar V2 sin quitar V1
+export const CheckoutCreateOrderRequest = z.object({ /* v1 */ });
+export const CheckoutV2CreateOrderRequest = z.object({ /* v2 */ });
+```
+
+Plazo de limpieza: quitar V1 cuando todos los teams hayan migrado. Tracking en issue.
+
+### Caso 3: cambio non-breaking
+
+Mergea solo. Otros teams se benefician sin migrar.
+
+## Qué cuenta como breaking
+
+- Quitar un campo de un schema.
+- Cambiar el tipo de un campo (string → number).
+- Quitar un export.
+- Cambiar la firma de una función exportada.
+- Cambiar el comportamiento observable de un componente.
+
+## Qué NO cuenta como breaking
+
+- Agregar campos opcionales.
+- Agregar exports.
+- Refactor interno sin cambiar la API pública.
+- Bug fixes (excepto si el bug era el comportamiento documentado).
+
+## Procedimiento concreto
+
+1. Identificar consumidores: `pnpm why @workshop/<package>`.
+2. Hacer el cambio + migración local en todos.
+3. `pnpm -r typecheck` (typecheck recursivo).
+4. PR con todo junto.
+5. CI verde → merge.
+
+## TODO Fase 2
+
+- Tooling para detectar breaking changes automáticamente (api-extractor o similar).
+- Changesets opt-in para packages que migran a npm.
