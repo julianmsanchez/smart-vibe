@@ -1,0 +1,66 @@
+# {{PROJECT_NAME}} — Wiki
+
+> {{PROJECT_TAGLINE}}
+
+---
+
+## ¿Qué es esta wiki?
+
+Wiki paralela al repo `{{PROJECT_NAME}}`. Acumula contexto operativo: qué se hizo en cada sesión, cómo se implementaron features, dónde se está parado, qué viene.
+
+**No es:**
+- Documentación final del producto (eso va en el README del repo).
+- Source of truth de metadata (eso es el PHS en `phs.yaml`).
+- Lugar para ADRs (eso es `docs/decisions/` en el repo).
+
+**Sí es:**
+- Memoria narrativa del proyecto.
+- Punto de partida para reanudar trabajo después de un parón.
+- Contexto para nuevos colaboradores (humanos o agentes).
+
+---
+
+## Navegación
+
+### Estado actual
+- [`RESUME.md`](./RESUME.md) — qué se viene haciendo, dónde estás parado.
+- [`ROADMAP.md`](./ROADMAP.md) — milestones, parking lot, ideas.
+- [`docs/teleport/SESSION_CONTEXT.md`](./docs/teleport/SESSION_CONTEXT.md) — contexto rápido para reanudar.
+
+### Histórico
+- [`docs/session_summaries/`](./docs/session_summaries/) — un archivo por sesión.
+- [`docs/implementation_logs/`](./docs/implementation_logs/) — logs detallados por feature.
+
+### Specs en flight
+- [`docs/features/`](./docs/features/) — specs de features que se están planeando o implementando.
+
+### Datos operativos
+- [`docs/SSOT/`](./docs/SSOT/) — single sources of truth secundarios (no metadata del proyecto, sino datos operativos: contactos, links, env vars descritos, etc.).
+
+---
+
+## Datos del proyecto
+
+- **Modo:** {{MODE}}
+- **Tier:** {{TIER}}
+- **Vertical:** {{VERTICAL}}
+- **Addon:** {{ADDON}}
+- **Repo:** ../{{PROJECT_NAME}}/
+- **PHS:** ../{{PROJECT_NAME}}/phs.yaml
+
+Para detalles del stack y decisiones, ver el repo (`README.md`, `phs.yaml`, `docs/decisions/`).
+
+---
+
+## Cómo contribuir a esta wiki
+
+1. **Después de una sesión de coding** → copiar `docs/session_summaries/_template.md` con fecha-feature como nombre.
+2. **Cuando una feature está hecha** → `docs/implementation_logs/_template.md`.
+3. **Cuando arrancás una feature compleja** → `docs/features/_template.md`.
+4. **Si cambia el roadmap** → editar `ROADMAP.md`.
+5. **Antes de cerrar una sesión larga** → updatear `RESUME.md` y `docs/teleport/SESSION_CONTEXT.md`.
+
+---
+
+> Generado por `bash scripts/bootstrap.sh` de smart-vibe v{{SMART_VIBE_VERSION}}.
+> Esta wiki es opcional. Si no la usás, podés borrarla — el toolkit no la requiere para validar reglas de oro.

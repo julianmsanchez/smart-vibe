@@ -1,0 +1,86 @@
+# SESSION_CONTEXT — {{PROJECT_NAME}}
+
+> Archivo "teleport": contexto comprimido para reanudar trabajo después de un parón. Pensado para que un agente nuevo (o vos mismo) lo lea en <2 min y entienda dónde está parado el proyecto.
+
+> **Updatear antes de cerrar una sesión larga.** Sin esto, la próxima sesión empieza desde cero.
+
+- **Última actualización:** _YYYY-MM-DD HH:MM_
+- **Modo:** {{MODE}}
+
+---
+
+## En 30 segundos
+
+> 3 oraciones máximo. Qué es el proyecto, dónde estamos, qué viene.
+
+---
+
+## Qué se viene haciendo (últimas N sesiones)
+
+> Bullets cortos, en orden cronológico inverso. Linkear session_summaries cuando aplique.
+
+- _2026-04-27 — implementé X (ver session_summary)_
+- _2026-04-26 — drafté ADR para Y_
+- _2026-04-25 — kicked off feature Z_
+
+---
+
+## Estado del repo
+
+- **Branch:** _main_
+- **Último commit:** _hash + mensaje_
+- **Hay cambios sin commitear:** _sí / no — qué_
+- **Hay PRs abiertos:** _sí / no — link_
+
+---
+
+## En qué estoy parado
+
+> Específico. Qué tarea concreta tenés agarrada o qué pregunta estás tratando de responder.
+
+- _Implementando: ..._
+- _Bloqueado por: ..._
+- _Esperando: ..._
+
+---
+
+## Próximas decisiones a tomar
+
+> Lo que el yo del próximo session necesita decidir.
+
+- _Decisión 1_
+- _Decisión 2_
+
+---
+
+## Archivos relevantes para reanudar
+
+> Los 3-5 archivos donde el próximo agente debería empezar a leer.
+
+- `phs.yaml` — siempre
+- `wiki/RESUME.md`
+- `_archivo donde estoy editando_`
+- `_archivo de contexto adicional_`
+
+---
+
+## Cosas que NO hacer en la próxima sesión
+
+> Errores ya cometidos o caminos descartados. Para no repetir.
+
+- _Cosa 1_
+- _Cosa 2_
+
+---
+
+## Comandos útiles que estaba corriendo
+
+> Comandos repetitivos para no tener que recordarlos.
+
+```bash
+# ej: corre los tests del módulo X
+{{PACKAGE_MANAGER}} test src/x/
+
+# ej: levanta el dev server con DB seedeada
+DATABASE_URL=... {{PACKAGE_MANAGER}} dev
+```
