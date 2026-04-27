@@ -60,6 +60,12 @@ Agrega un team nuevo:
 - `validate` → en CI o como pre-commit.
 - `add-team` → al sumar un team nuevo (hackathon día 2, corporate-squad nuevo, etc.).
 
+## Onboarding de un dev nuevo (NO usa este plugin)
+
+Para que un dev se una a un workshop ya bootstrapeado se usa `bash scripts/join.sh --as <team-id>` desde la raíz del clone — **no** un subcomando del plugin. El `join.sh` viaja embebido en el repo del workshop (lo copia el bootstrap del organizer desde `addons/workshop/scripts/join.sh.tmpl`), así dev y organizer comparten exactamente la misma versión.
+
+Este plugin sólo se usa **post-join**, principalmente para `/smart-workshop status` e `/smart-workshop integration-check`. Detalle del flujo en [`docs/QUICKSTART.md`](../../docs/QUICKSTART.md), escenario C.
+
 ## Implementación
 
 - `init` → invoca `bash scripts/bootstrap.sh --addon workshop`.

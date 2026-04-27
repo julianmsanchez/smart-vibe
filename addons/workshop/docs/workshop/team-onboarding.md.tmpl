@@ -1,0 +1,112 @@
+# Team onboarding — `{{PROJECT_NAME}}`
+
+> Cómo un dev se une a un team del workshop con **un solo prompt** en una sesión Claude Code recién abierta sobre carpeta vacía.
+> Audiencia: developers que se suman al workshop después del bootstrap inicial.
+
+---
+
+## TL;DR (1 prompt)
+
+Pegale esto a Claude Code (reemplazando `<repo-url>` y `<team-id>`):
+
+```
+Cloná <repo-url> y unite como team <team-id>.
+```
+
+Claude debería ejecutar:
+
+```bash
+git clone <repo-url>
+cd <repo>
+bash scripts/join.sh --as <team-id>
+```
+
+Eso te deja con `.env.shared` creado, `pnpm install` corrido, y next-steps en pantalla.
+
+> No necesitás la URL de smart-vibe — el `scripts/join.sh` ya viaja embebido en el clone del workshop.
+
+---
+
+## Qué hace `scripts/join.sh`
+
+1. **Valida que tu `--as <team-id>` exista** en `workshop.yaml.workshop.teams[].id`. Si te equivocás, exit 2 con la lista de teams válidos.
+2. **Crea `.env.shared`** copiándolo de `.env.shared.example` (sin sobrescribir si ya existe).
+3. **Habilita corepack y corre `pnpm install`** desde la raíz del monorepo.
+4. **Imprime next-steps** con:
+   - El comando `pnpm turbo dev --filter=shell --filter=apps/<team-id>`.
+   - La lista de variables que tenés que llenar en `.env.shared` (extraídas de `workshop.yaml.shared_infra`).
+   - Comandos del plugin Claude Code: `/smart-workshop status`, `/smart-workshop integration-check`.
+
+---
+
+## Recibir secrets del organizer (3 caminos)
+
+El repo del workshop **nunca contiene valores sensibles**. Tu organizer eligió una de estas estrategias en `workshop.yaml.shared_infra.secrets.strategy`:
+
+### A. `dotenv-local` (default vibe, recomendado para hackathons cortos)
+
+- El organizer comparte los valores por canal seguro: 1Password share link, mensaje DM en Slack/Discord, password manager grupal.
+- Vos pegás los valores en `.env.shared` (ya creado por `join.sh`).
+- `.env.shared` está en `.gitignore`. **Nunca lo commitees.**
+
+### B. `doppler` (recomendado para corporate / multi-day)
+
+- El organizer creó un proyecto Doppler y te invitó por email.
+- En vez de `.env.shared` correrías `doppler login && doppler setup`.
+- El comando dev pasa a ser `doppler run -- pnpm turbo dev …`.
+- Ventajas: rotación 1-click, audit logs, revoke al despedirte.
+- Equivalentes válidos: Infisical, AWS Secrets Manager.
+
+> **Nota:** en v0.1.1 `join.sh` aún no automatiza el flujo doppler — imprime un placeholder. Hay que correr los comandos doppler manualmente.
+
+### C. `sops-encrypted` (para repos privados con secretos versionados)
+
+- El organizer commitea `.env.shared.sops` cifrado con `age` o GPG.
+- Te comparte la key privada por canal seguro.
+- Corrés `sops -d .env.shared.sops > .env.shared`.
+
+> **Nota:** en v0.1.1 `join.sh` aún no automatiza el flujo sops — imprime un placeholder. Hay que correr `sops -d` manualmente.
+
+### Decisión rápida
+
+```
+¿Hackathon de fin de semana / experimento corto?  → A (dotenv-local)
+¿Corporate-squad / multi-day / N>10 devs?         → B (doppler)
+¿Necesitás historial versionado de secrets?        → C (sops-encrypted)
+¿Modo vibe puro?                                    → A
+```
+
+---
+
+## Tras `join.sh`: empezar a vibear
+
+1. **Abrí Claude Code dentro de `apps/<team-id>/`.** El `CLAUDE.md` de ese directorio te da identidad de team automáticamente.
+2. **Levantá la app:**
+   ```bash
+   pnpm turbo dev --filter=shell --filter=apps/<team-id>
+   ```
+3. **Verificá contratos cross-team antes de cada PR:**
+   ```bash
+   /smart-workshop integration-check
+   ```
+
+---
+
+## Troubleshooting
+
+- **`team-id 'xxx' no existe`:** corré `bash scripts/join.sh --as <team-id>` con uno de los teams listados en el error.
+- **`Falta python3` o `Falta PyYAML`:** instalá Python 3 y `pip3 install --user pyyaml`. `join.sh` parsea `workshop.yaml` igual que `doctor.sh`.
+- **`pnpm not found`:** corré `corepack enable` manualmente y reintentá.
+- **Auth para repo privado:** `gh auth setup-git` antes de clonar.
+
+---
+
+## ¿Querés que Claude omita la URL en el prompt?
+
+Si vibeás seguido contra el mismo workshop, agregá esta línea a tu `~/.claude/CLAUDE.md`:
+
+```
+Cuando trabaje en {{PROJECT_NAME}}, asumí siempre el repo <repo-url>.
+```
+
+Después podés decirle simplemente *"unite al workshop como team checkout"*.

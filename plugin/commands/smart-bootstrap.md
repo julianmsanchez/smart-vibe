@@ -30,6 +30,17 @@ Inicia un proyecto nuevo desde cero con el Smart Vibe Framework. Hace 4 pregunta
 
 - El directorio ya tiene código. Para retrofit usar `/smart-phs` directamente.
 
+## Equivalente fuera del repo (1 prompt en carpeta vacía)
+
+Si todavía no clonaste smart-vibe, podés invocar el mismo flujo desde una sesión Claude Code recién abierta sobre carpeta vacía con curl-pipe-bash:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/julianmsanchez/smart-vibe/main/scripts/install.sh \
+  | bash -s -- --type single-team --name <name> --addon node-ts
+```
+
+Esto cachea el repo en `~/.smart-vibe/dist/` y forwardea los flags a `bootstrap.sh`. Ver [`docs/QUICKSTART.md`](../../docs/QUICKSTART.md) para los 3 escenarios soportados.
+
 ## Implementación
 
 Ejecuta `bash scripts/bootstrap.sh` con los valores capturados como flags:

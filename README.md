@@ -55,12 +55,62 @@ En vez de empezar de cero, corrés un comando, contestás 4 preguntas y obtenés
 
 ---
 
-## 3 pasos
+## Quick Start con Claude Code (1 prompt)
+
+> **Caso primario:** vibe coder en una sesión Claude Code recién abierta sobre carpeta vacía. Sin clonar nada manualmente.
+
+3 escenarios. El detalle completo (incluyendo cómo redactar el prompt para que el LLM ejecute lo correcto) está en [`docs/QUICKSTART.md`](docs/QUICKSTART.md).
+
+### A. Standalone single-team (caso más frecuente)
+
+Prompt:
+
+```
+Iniciá un proyecto smart-vibe (https://github.com/julianmsanchez/smart-vibe).
+Tipo: single-team. Nombre: mi-app. Stack: node-ts.
+```
+
+Comando que ejecuta Claude:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/julianmsanchez/smart-vibe/main/scripts/install.sh \
+  | bash -s -- --type single-team --name mi-app --addon node-ts
+```
+
+### B. Workshop — organizer (1 vez por hackathon)
+
+```
+Iniciá un workshop smart-vibe (https://github.com/julianmsanchez/smart-vibe).
+Nombre: hackathon-ai-2026. Equipos: checkout, search, recs, profile.
+```
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/julianmsanchez/smart-vibe/main/scripts/install.sh \
+  | bash -s -- --type workshop --name hackathon-ai-2026 --teams "checkout,search,recs,profile"
+```
+
+### C. Workshop — team developer (no requiere URL de smart-vibe)
+
+```
+Cloná https://github.com/org/hackathon-ai-2026 y unite como team checkout.
+```
+
+```bash
+git clone https://github.com/org/hackathon-ai-2026.git
+cd hackathon-ai-2026
+bash scripts/join.sh --as checkout
+```
+
+> El `scripts/join.sh` viaja embebido en el repo del workshop, copiado por el bootstrap del organizer. Garantiza que dev y organizer usen la misma versión.
+
+---
+
+## Alternativa sin Claude (CLI puro)
 
 ```bash
 # 1. Bootstrap interactivo (4 preguntas: tipo, tier, vertical, addon)
 bash scripts/bootstrap.sh
-# alternativa: npx smart-vibe init
+# alternativa aspiracional: npx smart-vibe init
 
 # 2. Entrá al proyecto generado y empezá a vibear
 cd mi-proyecto && code .
