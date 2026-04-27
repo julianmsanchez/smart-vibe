@@ -44,7 +44,9 @@ yq_get() {
   python3 - <<PY
 import yaml
 d = yaml.safe_load(open("workshop.yaml"))
-v = $expr
+v = (
+$expr
+)
 if v is None:
     print("")
 else:
