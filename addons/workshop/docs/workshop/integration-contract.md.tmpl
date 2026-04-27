@@ -1,0 +1,58 @@
+# Contrato de integración entre teams — `{{PROJECT_NAME}}`
+
+> Cómo los teams del workshop colaboran sin pisarse. Documento corto, vivo, en el repo.
+
+## Principio
+
+**Cada team es dueño de su superficie.** El resto de los teams sólo lo conocen a través de:
+
+1. Un **prefijo HTTP** (`api_prefix` declarado en `workshop.yaml`).
+2. Un **schema Zod** publicado en `@workshop/api-contracts`.
+3. Una **ruta UI** (`/{team_id}`) que monta el shell.
+
+Todo lo demás (DB interna del team, tooling, librerías) es opaco.
+
+## Reglas
+
+### Comunicación inter-team
+- **Sync:** sólo HTTP via los schemas de `@workshop/api-contracts`. Validar request **y** response con Zod en el wire.
+- **Async:** no hay event bus en MVP. Si necesitás eventos, escribilos en una tabla compartida y polleala (o esperá Fase 2).
+
+### Schemas compartidos
+- Si un team necesita romper un contrato existente: PR atómico que actualiza schema **y** todos los consumidores.
+- Si no es viable atómico (otro team mid-flight): agregar versión nueva (`FooV2Request`) sin quitar la vieja. Limpieza después.
+
+### UI compartida
+- Sólo se usa `@workshop/design-system`. Si necesitás algo que no está, abrí PR al design-system, no fork-ees en tu team.
+- Nada de mutar el ThemeProvider del shell desde un team.
+
+### Datos compartidos
+- DB con strategy declarada en `workshop.yaml.shared_infra.databases.strategy`.
+- Cada team escribe **sólo** en su namespace (schema o filas con `team_id`). Cross-reads requieren contrato HTTP.
+- Migraciones consolidadas por el shell owner.
+
+### Secrets
+- Cada team declara qué APIs externas necesita en `workshop.yaml.shared_infra.apis_external[].access`.
+- Vars individuales en `.env.shared.example`. Nada de hardcodear keys en código.
+
+## Checklist al crear un endpoint nuevo cross-team
+
+1. ¿Está el schema en `@workshop/api-contracts`? Si no, agregarlo.
+2. ¿Está el namespace en `api_prefix`? Si no, evitar colisión.
+3. ¿Validás request con `safeParse`?
+4. ¿Validás response también (al menos en dev) ?
+5. ¿Logueás con `correlation-id` propagado del shell?
+
+## Resolución de conflictos
+
+Conflicto = dos teams quieren mutar el mismo recurso compartido (`design-system`, `api-contracts`, DB schema).
+
+1. Discutir en issue. Sin merge unilateral.
+2. Si urge, el shell owner es el tie-breaker.
+3. Documentar la decisión en `docs/workshop/decisions/` (ADR).
+
+## TODO Fase 2
+
+- Generar typed clients automáticos desde `api-contracts` (`packages/api-clients/`).
+- Event bus opt-in (`packages/events/`).
+- Auto-test de integración (smoke E2E entre teams).

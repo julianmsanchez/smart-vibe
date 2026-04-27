@@ -1,0 +1,28 @@
+/**
+ * Landing del shell. Lista los teams del workshop con links a /{team_id}.
+ *
+ * En MVP esto se hardcodea o se lee de un archivo JSON generado a partir
+ * de workshop.yaml. Cuando el shell madure, leer dinámicamente.
+ */
+
+const teams = [
+  // ej: { id: 'team-checkout', domain: 'checkout' }
+];
+
+export default function HomePage() {
+  return (
+    <main style={{ padding: '2rem' }}>
+      <h1>{{PROJECT_NAME}}</h1>
+      <p>Workshop monorepo. Teams disponibles:</p>
+      <ul>
+        {teams.map((t: { id: string; domain: string }) => (
+          <li key={t.id}>
+            <a href={`/${t.id}`}>
+              {t.id} — {t.domain}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </main>
+  );
+}

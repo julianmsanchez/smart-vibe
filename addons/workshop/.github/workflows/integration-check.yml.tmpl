@@ -1,0 +1,56 @@
+name: Integration Check
+
+# Cross-team integration: chequea que un cambio en un team no rompa a otros.
+# Corre full build + tests con turbo (que cachea lo que no cambió).
+#
+# Activado por workshop.yaml.ci_cd.integration_check=enabled.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  cross-team-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historia completa para detectar archivos cambiados
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Detect changed packages
+        id: changes
+        run: |
+          # Lista paquetes afectados desde el merge-base con main.
+          BASE=$(git merge-base origin/main HEAD)
+          echo "Affected packages since $BASE:"
+          pnpm turbo run build --filter=...[$BASE] --dry=json | jq -r '.tasks[].package' | sort -u
+
+      - name: Validate workshop.yaml
+        run: |
+          # Si tu repo tiene un script de validación local, llamalo.
+          # Si no, podés correr el doctor de smart-vibe instalado globalmente.
+          test -f workshop.yaml && echo "workshop.yaml present" || (echo "missing workshop.yaml" && exit 1)
+
+      - name: Build all (turbo cache aware)
+        run: pnpm build
+
+      - name: Test all
+        run: pnpm test
+        env:
+          NODE_ENV: test

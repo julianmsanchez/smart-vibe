@@ -1,0 +1,94 @@
+# Tokens y UI compartida — `{{PROJECT_NAME}}`
+
+> Cómo los teams pintan consistente sin negociar cada decisión visual.
+
+## Estructura
+
+```
+packages/design-system/
+├── tokens/        ← JSON: colors, spacing, typography
+├── theme/         ← ThemeProvider para Next.js
+├── components/    ← primitivos: Button, Input
+└── assets/        ← logos, fuentes, íconos
+```
+
+## Cómo se usa desde un team
+
+```tsx
+// 1. Tokens (preferido para layouts y estilos custom)
+import { tokens } from '@workshop/design-system/tokens';
+const styles = { padding: tokens.spacing.md, color: tokens.colors.text };
+
+// 2. Hook (cuando estás dentro del shell y querés override-friendly)
+import { useTheme } from '@workshop/design-system/theme';
+function MyComponent() {
+  const t = useTheme();
+  return <div style={{ background: t.colors.surface }}>...</div>;
+}
+
+// 3. Primitivos (cuando aplica)
+import { Button } from '@workshop/design-system/components';
+<Button variant="primary">Continuar</Button>
+```
+
+## Bootstrap del shell
+
+`apps/shell/src/app/layout.tsx` (Next.js):
+
+```tsx
+import { ThemeProvider } from '@workshop/design-system/theme';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="es">
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+Cada team renderea **dentro** del provider del shell. No instanciar `ThemeProvider` por team.
+
+## Política de cambios
+
+| Tipo de cambio | Quién decide | Cómo se aplica |
+|---|---|---|
+| Agregar token nuevo | Cualquier team | PR al design-system |
+| Cambiar valor de token existente | Coordinación obligatoria | PR atómico que toca todos los teams afectados |
+| Agregar componente nuevo | Cualquier team | PR al design-system |
+| Cambiar API de un componente | Coordinación obligatoria | PR atómico o V2 (`ButtonV2`) sin quitar el viejo |
+| Override por team | Wrapper local en el team | Nunca mutar tokens compartidos |
+
+## Override válido
+
+Cuando un team necesita una variación visual:
+
+```tsx
+// apps/team-checkout/components/CheckoutButton.tsx
+import { Button, type ButtonProps } from '@workshop/design-system/components';
+
+export function CheckoutButton(props: ButtonProps) {
+  return <Button {...props} style={{ borderRadius: 999, ...props.style }} />;
+}
+```
+
+Compone, no muta.
+
+## Override inválido
+
+```tsx
+// MAL — mutar tokens compartidos
+import { tokens } from '@workshop/design-system/tokens';
+tokens.colors.primary = '#ff00ff'; // boom, otros teams cambian sin aviso
+
+// MAL — instanciar otro ThemeProvider
+<ThemeProvider override={{ colors: { primary: '#ff00ff' } }}> // sólo válido para Storybook
+```
+
+## TODO Fase 2
+
+- Style Dictionary export (CSS vars, tailwind config, iOS/Android).
+- Dark mode tokens.
+- Storybook compartido para `components/`.

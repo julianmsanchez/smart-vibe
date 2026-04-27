@@ -1,0 +1,22 @@
+import { ThemeProvider } from '@workshop/design-system/theme';
+import type { ReactNode } from 'react';
+
+/**
+ * Root layout del shell. Envuelve toda la app en el ThemeProvider del
+ * design-system, lo que garantiza tokens y temas consistentes en todos
+ * los teams montados bajo /{team_id}.
+ */
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="es">
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
+    </html>
+  );
+}
+
+export const metadata = {
+  title: '{{PROJECT_NAME}}',
+  description: '{{DESCRIPTION}}',
+};

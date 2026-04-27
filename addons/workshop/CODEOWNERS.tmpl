@@ -1,0 +1,32 @@
+# CODEOWNERS — generado a partir de workshop.yaml.teams[]
+#
+# Cada team es dueño de su app y de los packages que cree dentro de su scope.
+# Los packages cross-cutting (design-system, types, auth, api-contracts,
+# config, infra-contracts, fixtures) y el shell son owned por el equipo
+# `shell` (típicamente los maintainers del workshop).
+#
+# Sintaxis: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ---- Cross-cutting (shell) ----
+/apps/shell/                    @{{SHELL_OWNER}}
+/packages/design-system/        @{{SHELL_OWNER}}
+/packages/types/                @{{SHELL_OWNER}}
+/packages/auth/                 @{{SHELL_OWNER}}
+/packages/api-contracts/        @{{SHELL_OWNER}}
+/packages/config/               @{{SHELL_OWNER}}
+/packages/infra-contracts/      @{{SHELL_OWNER}}
+/packages/fixtures/             @{{SHELL_OWNER}}
+
+# ---- workshop.yaml + tooling raíz ----
+/workshop.yaml                  @{{SHELL_OWNER}}
+/turbo.json                     @{{SHELL_OWNER}}
+/pnpm-workspace.yaml            @{{SHELL_OWNER}}
+/.github/                       @{{SHELL_OWNER}}
+
+# ---- Teams (autogenerar al hacer bootstrap) ----
+# /apps/team-checkout/    @alice @bob
+# /apps/team-search/      @carla @dani
+# /apps/team-recs/        @eve @frank @gina
+
+# ---- Docs ----
+/docs/                          @{{SHELL_OWNER}}
