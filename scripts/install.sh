@@ -69,10 +69,11 @@ require_cmd node "Instalar Node >=18: https://nodejs.org/" || MISSING=1
 require_cmd corepack "Viene con Node >=16.10. 'corepack enable' si está deshabilitado." || MISSING=1
 [[ $MISSING -eq 0 ]] || { err "Faltan dependencias. Abortando."; exit 1; }
 
-# bash 4+ es necesario para los arrays asociativos / read -ra de bootstrap.sh
+# bash >=3.2 alcanza para bootstrap.sh (default macOS). Validamos por las dudas.
 BASH_MAJOR="${BASH_VERSINFO[0]:-0}"
-if [[ "$BASH_MAJOR" -lt 4 ]]; then
-  err "bash >=4 requerido (detectado: $BASH_VERSION)."
+BASH_MINOR="${BASH_VERSINFO[1]:-0}"
+if [[ "$BASH_MAJOR" -lt 3 ]] || { [[ "$BASH_MAJOR" -eq 3 ]] && [[ "$BASH_MINOR" -lt 2 ]]; }; then
+  err "bash >=3.2 requerido (detectado: $BASH_VERSION)."
   echo "  En macOS: 'brew install bash' y re-ejecutar con el bash nuevo." >&2
   exit 1
 fi
