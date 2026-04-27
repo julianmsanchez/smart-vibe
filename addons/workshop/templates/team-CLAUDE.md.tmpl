@@ -1,0 +1,78 @@
+# CLAUDE.md — apps/{{TEAM_ID}}/ ({{WORKSHOP_NAME}})
+
+> Constitución operativa de **este team** dentro del workshop `{{WORKSHOP_NAME}}`.
+> Si una instrucción acá contradice el prompt, gana este archivo.
+> Para reglas cross-team y SSOT del monorepo, ver `../../CLAUDE.md` y `../../workshop.yaml`.
+
+---
+
+## Identidad del team
+
+- **Workshop:** {{WORKSHOP_NAME}}
+- **Team ID:** {{TEAM_ID}}
+- **Dominio:** {{TEAM_DOMAIN}}
+- **Members:** {{TEAM_MEMBERS}}
+- **App path:** `apps/{{TEAM_ID}}/`
+- **API prefix:** `/api/{{TEAM_ID}}`
+- **Mode:** vibe
+
+> Si abrís Claude Code dentro de `apps/{{TEAM_ID}}/`, ya sabés que estás en este team. No mezclar dominio con otros teams sin pasar por contratos compartidos en `packages/`.
+
+---
+
+## Reglas específicas del team
+
+1. **Tu dominio termina en `/api/{{TEAM_ID}}`.** Cualquier endpoint debe vivir bajo ese prefijo.
+2. **No importes código de `apps/<otro-team>/`.** Si necesitás compartir algo, va en `packages/` (api-contracts, types, design-system, etc.).
+3. **PHS local (`apps/{{TEAM_ID}}/phs.yaml`) referencia el workshop.yaml global** con `workshop.ref: ../../workshop.yaml`. No dupliques infra ahí.
+4. **Tests automatizados en este team usan Vitest** (heredado del addon node-ts).
+5. **UI:** consumí componentes y tokens de `@workshop/design-system`. No pegues colores hex sueltos.
+6. **Auth, contratos HTTP, fixtures:** consumir desde packages, no reimplementar.
+
+---
+
+## Comandos típicos (desde la raíz del monorepo)
+
+```bash
+# Levantar tu app + el shell:
+pnpm turbo dev --filter=shell --filter=apps/{{TEAM_ID}}
+
+# Tests sólo de tu app:
+pnpm turbo test --filter=apps/{{TEAM_ID}}
+
+# Lint sólo de tu app:
+pnpm turbo lint --filter=apps/{{TEAM_ID}}
+
+# Estado del workshop completo:
+/smart-workshop status
+
+# Verificar contratos contra otros teams:
+/smart-workshop integration-check
+```
+
+---
+
+## Cross-cutting (recordatorios)
+
+- **Secrets:** llená `.env.shared` con los valores que el organizer compartió. Nunca commitearlo.
+- **Logs:** usar el logger compartido (estructurado JSON con `correlation_id`). No `console.log` en código.
+- **Breaking changes en packages compartidos:** lockean PR hasta que los demás teams migren. Coordinar en el canal del workshop.
+- **Para agregar un team nuevo, mover infra a otro tier, o cambiar contratos compartidos:** editar `workshop.yaml` en la raíz del monorepo (NO acá).
+
+---
+
+## Cuándo escalar al organizer
+
+- Querés agregar una API externa que aún no está en `workshop.yaml.shared_infra.apis_external[]`.
+- Necesitás una nueva tabla / schema de DB.
+- Vas a cambiar un contrato en `packages/api-contracts/` que afecta a otros teams.
+- El integration-check falla y no es por tu código.
+
+---
+
+## Próximos pasos al abrir Claude por primera vez
+
+1. Leer `phs.yaml` de este team.
+2. Leer `../../workshop.yaml` para entender infra compartida.
+3. Buscar tu dominio (`{{TEAM_DOMAIN}}`) en `packages/api-contracts/` para ver qué contratos ya existen.
+4. Empezar a vibear.

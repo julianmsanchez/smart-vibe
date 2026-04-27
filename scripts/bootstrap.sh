@@ -152,6 +152,25 @@ if [[ "$TYPE" == "workshop" ]]; then
 
   cp -r "$REPO_ROOT/addons/workshop/." "$TARGET_DIR/"
 
+  # --- handle templates con scope no genérico ---
+  # join.sh viaja embebido en el monorepo: lee workshop.yaml en runtime, no
+  # tiene placeholders. Sólo lo movemos a su nombre final y le damos permiso
+  # de ejecución antes del loop genérico (sino el loop lo procesaría como tmpl).
+  if [[ -f "$TARGET_DIR/scripts/join.sh.tmpl" ]]; then
+    mv "$TARGET_DIR/scripts/join.sh.tmpl" "$TARGET_DIR/scripts/join.sh"
+    chmod +x "$TARGET_DIR/scripts/join.sh"
+  fi
+
+  # team-CLAUDE.md.tmpl tiene placeholders por team ({{TEAM_ID}}, etc.) que el
+  # render genérico no conoce. Lo stasheamos fuera del proyecto y lo
+  # renderizamos al final, una vez que apps/<team>/ exista.
+  TEAM_CLAUDE_STASH=""
+  if [[ -f "$TARGET_DIR/templates/team-CLAUDE.md.tmpl" ]]; then
+    TEAM_CLAUDE_STASH=$(mktemp)
+    cp "$TARGET_DIR/templates/team-CLAUDE.md.tmpl" "$TEAM_CLAUDE_STASH"
+    rm -rf "$TARGET_DIR/templates"
+  fi
+
   # Renderizar todos los .tmpl del workshop (recorre y aplica sed)
   while IFS= read -r -d '' tmpl; do
     out="${tmpl%.tmpl}"
@@ -227,6 +246,22 @@ if [[ "$TYPE" == "workshop" ]]; then
   for t in "${TEAM_ARR[@]}"; do
     cp -r "$TARGET_DIR/apps/_team-template" "$TARGET_DIR/apps/$t"
   done
+
+  # Render apps/<team>/CLAUDE.md desde el stash.
+  # En modo vibe los placeholders TEAM_DOMAIN/TEAM_MEMBERS quedan en TODO; el
+  # organizer los completa post-bootstrap (decisión cerrada del plan).
+  if [[ -n "${TEAM_CLAUDE_STASH:-}" && -f "$TEAM_CLAUDE_STASH" ]]; then
+    for t in "${TEAM_ARR[@]}"; do
+      sed \
+        -e "s|{{TEAM_ID}}|$t|g" \
+        -e "s|{{TEAM_DOMAIN}}|TODO-domain|g" \
+        -e "s|{{TEAM_MEMBERS}}|TODO-members|g" \
+        -e "s|{{WORKSHOP_NAME}}|$NAME|g" \
+        -e "s|{{PROJECT_NAME}}|$NAME|g" \
+        "$TEAM_CLAUDE_STASH" > "$TARGET_DIR/apps/$t/CLAUDE.md"
+    done
+    rm -f "$TEAM_CLAUDE_STASH"
+  fi
 fi
 
 # --- single-team con node-ts ---

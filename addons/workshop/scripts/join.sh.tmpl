@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# scripts/join.sh
+# Onboarding de un dev a un workshop ya bootstrapeado.
+#
+# Uso desde la raíz del clone del workshop:
+#   bash scripts/join.sh --as <team-id>
+#
+# Pasos:
+#   1. Lee workshop.yaml (con python3 + yaml).
+#   2. Valida que <team-id> exista en teams[].id.
+#   3. cp .env.shared.example .env.shared (si no existe).
+#   4. corepack enable && pnpm install.
+#   5. Imprime next-steps (dev cmd, vars a llenar, plugin commands).
+#
+# Ramifica por shared_infra.secrets.strategy:
+#   - dotenv-local        → flujo default (copy + pegar valores manualmente)
+#   - doppler             → placeholder (TODO Fase 2)
+#   - sops-encrypted      → placeholder (TODO Fase 2)
+
+set -euo pipefail
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# --- args ---
+TEAM_ID=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --as) TEAM_ID="$2"; shift 2 ;;
+    -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
+    *) echo "Arg desconocido: $1" >&2; exit 2 ;;
+  esac
+done
+
+# --- helpers ---
+err()  { echo "✗ $*" >&2; }
+info() { echo "→ $*"; }
+ok()   { echo "✓ $*"; }
+
+# Lee un campo escalar del workshop.yaml usando python3 + PyYAML.
+# Uso: yq_get "<expresión python que retorna str>"
+yq_get() {
+  local expr="$1"
+  python3 - <<PY
+import yaml
+d = yaml.safe_load(open("workshop.yaml"))
+v = $expr
+if v is None:
+    print("")
+else:
+    print(v)
+PY
+}
+
+# --- pre-checks ---
+if ! command -v python3 >/dev/null 2>&1; then
+  err "Falta python3 (lo usamos para parsear workshop.yaml)."
+  exit 1
+fi
+if ! python3 -c "import yaml" 2>/dev/null; then
+  err "Falta PyYAML. Instalar con: pip3 install --user pyyaml"
+  exit 1
+fi
+if [[ ! -f workshop.yaml ]]; then
+  err "workshop.yaml no encontrado en $PROJECT_ROOT. ¿Estás en la raíz del workshop?"
+  exit 1
+fi
+
+# --- listar teams ---
+TEAMS_LIST=$(yq_get "', '.join(t['id'] for t in d['workshop']['teams'])")
+if [[ -z "$TEAM_ID" ]]; then
+  err "Debés pasar --as <team-id>."
+  echo "  Teams disponibles: [$TEAMS_LIST]" >&2
+  exit 2
+fi
+
+VALID=$(yq_get "'yes' if any(t['id'] == '$TEAM_ID' for t in d['workshop']['teams']) else 'no'")
+if [[ "$VALID" != "yes" ]]; then
+  err "Team-id '$TEAM_ID' no existe en workshop.yaml."
+  echo "  Teams válidos: [$TEAMS_LIST]" >&2
+  exit 2
+fi
+
+WORKSHOP_NAME=$(yq_get "d['workshop'].get('name', '')")
+SECRETS_STRATEGY=$(yq_get "d['workshop'].get('shared_infra', {}).get('secrets', {}).get('strategy', 'dotenv-local')")
+SHARED_FILE=$(yq_get "d['workshop'].get('shared_infra', {}).get('secrets', {}).get('shared_file', '.env.shared.example')")
+
+ok "Workshop: $WORKSHOP_NAME · team: $TEAM_ID · secrets strategy: $SECRETS_STRATEGY"
+
+# --- secrets handling ---
+case "$SECRETS_STRATEGY" in
+  dotenv-local)
+    if [[ -f .env.shared ]]; then
+      ok ".env.shared ya existe (no se sobrescribe)"
+    else
+      if [[ -f "$SHARED_FILE" ]]; then
+        cp "$SHARED_FILE" .env.shared
+        ok "Creado .env.shared a partir de $SHARED_FILE"
+      else
+        echo "⚠ $SHARED_FILE no existe; saltando creación de .env.shared." >&2
+      fi
+    fi
+    ;;
+  doppler)
+    info "secrets.strategy=doppler — TODO Fase 2."
+    info "Por ahora caete a dotenv-local manualmente: cp $SHARED_FILE .env.shared"
+    ;;
+  sops-encrypted)
+    info "secrets.strategy=sops-encrypted — TODO Fase 2."
+    info "Por ahora caete a dotenv-local manualmente: cp $SHARED_FILE .env.shared"
+    ;;
+  *)
+    info "secrets.strategy desconocida: $SECRETS_STRATEGY (saltando)."
+    ;;
+esac
+
+# --- corepack + install ---
+if command -v corepack >/dev/null 2>&1; then
+  info "Habilitando corepack..."
+  corepack enable >/dev/null 2>&1 || true
+else
+  echo "⚠ corepack no disponible; pnpm puede requerir instalación manual." >&2
+fi
+
+if command -v pnpm >/dev/null 2>&1; then
+  info "Corriendo pnpm install..."
+  pnpm install
+  ok "Dependencias instaladas"
+else
+  err "pnpm no disponible tras corepack enable. Instalalo con 'npm i -g pnpm' y re-ejecutá."
+  exit 1
+fi
+
+# --- vars requeridas para este team ---
+VARS_REQUIRED=$(yq_get "
+'\n'.join(
+    sorted({
+        a.get('env_var', '')
+        for a in (d['workshop'].get('shared_infra', {}).get('apis_external') or [])
+        if a.get('env_var') and (
+            not a.get('access') or '$TEAM_ID' in a.get('access', [])
+        )
+    } | (
+        {d['workshop']['shared_infra']['databases'].get('url_env', '')}
+        if d['workshop'].get('shared_infra', {}).get('databases', {}).get('url_env') else set()
+    ))
+)
+")
+
+# --- next-steps ---
+echo ""
+echo "============================================"
+echo "✓ Te uniste al workshop como team: $TEAM_ID"
+echo "============================================"
+echo ""
+echo "Próximos pasos:"
+echo ""
+echo "  1) Llená .env.shared con los secrets que el organizer compartió."
+if [[ -n "$VARS_REQUIRED" ]]; then
+  echo "     Variables requeridas (según workshop.yaml):"
+  echo "$VARS_REQUIRED" | sed 's/^/       - /'
+fi
+echo ""
+echo "  2) Levantá tu app + el shell:"
+echo "       pnpm turbo dev --filter=shell --filter=apps/$TEAM_ID"
+echo ""
+echo "  3) Comandos del plugin Claude Code para vibear con disciplina:"
+echo "       /smart-workshop status"
+echo "       /smart-workshop integration-check"
+echo ""
+echo "  4) Tu CLAUDE.md de team está en: apps/$TEAM_ID/CLAUDE.md"
+echo "     Abrilo en una nueva sesión Claude Code para arrancar con identidad cargada."
+echo ""
