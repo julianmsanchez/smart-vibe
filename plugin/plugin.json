@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.claude.com/schemas/plugin.json",
+  "name": "smart-vibe",
+  "version": "0.1.0",
+  "description": "Smart Vibe Framework — modo vibe para prototipado con guardrails. Comandos /smart-* para bootstrap, PHS, features, summaries y workshops multi-team.",
+  "author": "Julian Sánchez · Celeru SAS BIC",
+  "license": "MIT",
+  "repository": "https://github.com/celeru/smart-vibe",
+  "homepage": "https://github.com/celeru/smart-vibe",
+  "tags": [
+    "scaffolding",
+    "phs",
+    "vibe-coding",
+    "monorepo",
+    "workshop"
+  ]
+}
