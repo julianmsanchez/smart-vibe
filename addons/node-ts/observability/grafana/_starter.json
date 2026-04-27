@@ -1,0 +1,80 @@
+{
+  "_comment": "Dashboard starter de Grafana para apps node-ts. Importar en Grafana → Dashboards → Import → Upload JSON. Editar UIDs antes de usar (variable {{PROJECT_NAME}}).",
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "graphTooltip": 0,
+  "id": null,
+  "title": "{{PROJECT_NAME}} — Starter",
+  "tags": ["smart-vibe", "starter"],
+  "uid": "{{PROJECT_NAME}}-starter",
+  "version": 1,
+  "schemaVersion": 38,
+  "style": "dark",
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP Request Rate (req/s)",
+      "type": "timeseries",
+      "datasource": "prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"{{PROJECT_NAME}}-backend-prod\"}[1m]))",
+          "legendFormat": "rps"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "HTTP Latency p95 (s)",
+      "type": "timeseries",
+      "datasource": "prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job=\"{{PROJECT_NAME}}-backend-prod\"}[5m])))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Error Rate (5xx %)",
+      "type": "timeseries",
+      "datasource": "prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"{{PROJECT_NAME}}-backend-prod\",status=~\"5..\"}[1m])) / sum(rate(http_requests_total{job=\"{{PROJECT_NAME}}-backend-prod\"}[1m]))",
+          "legendFormat": "5xx ratio"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Process Memory (MB)",
+      "type": "timeseries",
+      "datasource": "prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes{job=\"{{PROJECT_NAME}}-backend-prod\"} / 1024 / 1024",
+          "legendFormat": "rss MB"
+        }
+      ]
+    }
+  ]
+}

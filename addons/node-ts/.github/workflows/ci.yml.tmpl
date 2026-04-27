@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: '{{PACKAGE_MANAGER}}'
+
+      - name: Install dependencies
+        run: {{PACKAGE_MANAGER}} install --frozen-lockfile
+
+      - name: Run linter
+        run: {{PACKAGE_MANAGER}} run lint --if-present
+
+      - name: Typecheck
+        run: {{PACKAGE_MANAGER}} run typecheck --if-present
+
+      - name: Build TypeScript
+        run: {{PACKAGE_MANAGER}} run build
+
+      - name: Run tests
+        run: {{PACKAGE_MANAGER}} test --if-present
+        env:
+          NODE_ENV: test
