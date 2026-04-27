@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "Settings PERSONALES de este checkout. NO se commitea (está en .gitignore). Acá ponés overrides locales: permisos extra para tus tools, env vars de tu máquina, modelo preferido, etc.",
+  "_examples": [
+    "Para permitir tools adicionales agregar a permissions.allow:",
+    "  'Bash(docker:*)', 'Bash(psql:*)', 'WebFetch(domain:tu-dominio-interno)'",
+    "Para modelo preferido agregar:",
+    "  \"model\": \"claude-opus-4-6\""
+  ],
+
+  "permissions": {
+    "allow": [],
+    "deny": []
+  },
+
+  "env": {}
+}

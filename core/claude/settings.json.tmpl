@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "Settings compartidas del proyecto {{PROJECT_NAME}} (modo {{MODE}}). Commiteado al repo. Para overrides personales usar .claude/settings.local.json (gitignored).",
+
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Glob(**)",
+      "Grep(**)",
+      "Edit(**)",
+      "Write(**)",
+
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff)",
+      "Bash(git diff:*)",
+      "Bash(git log)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(git switch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git rev-parse:*)",
+
+      "Bash({{PACKAGE_MANAGER}} install)",
+      "Bash({{PACKAGE_MANAGER}} install:*)",
+      "Bash({{PACKAGE_MANAGER}} run:*)",
+      "Bash({{PACKAGE_MANAGER}} test:*)",
+      "Bash({{PACKAGE_MANAGER}} lint:*)",
+      "Bash({{PACKAGE_MANAGER}} build:*)",
+      "Bash({{PACKAGE_MANAGER}} typecheck:*)",
+      "Bash({{TEST_RUNNER}}:*)",
+
+      "Bash(ls:*)",
+      "Bash(pwd)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+
+      "Bash(bash scripts/doctor.sh:*)",
+      "Bash(node:*)",
+      "Bash(npx tsc:*)"
+    ],
+
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(sudo:*)",
+      "Bash(curl * | sh:*)",
+      "Bash(curl * | bash:*)",
+      "Bash(wget * | sh:*)",
+      "Bash(wget * | bash:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/credentials/**)",
+      "Read(**/.aws/**)",
+      "Read(**/.ssh/**)"
+    ]
+  },
+
+  "env": {
+    "_comment": "Variables que Claude Code expone al shell. NO poner secretos acá.",
+    "SMART_VIBE_MODE": "{{MODE}}",
+    "SMART_VIBE_PROJECT": "{{PROJECT_NAME}}"
+  },
+
+  "_hooks_comment": "En modo vibe los hooks vienen vacíos por defecto. En graduating se agregan PreToolUse para validar phs.yaml antes de commits y PostToolUse para correr tests post-edit. Ver core/policies/07-change-control en celeru-pro."
+}
