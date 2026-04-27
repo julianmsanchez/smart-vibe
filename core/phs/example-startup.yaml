@@ -1,0 +1,49 @@
+# PHS · Ejemplo · Startup en modo vibe (single-team)
+#
+# Caso típico: 1-3 personas, stack TypeScript + Node, sin DB definida todavía,
+# vertical general. Modo vibe permite varios campos en `~`.
+
+project:
+  name: vibe-tracker
+  mode: vibe
+  type: single-team
+  vertical: general
+  tier: startup
+  created_at: 2026-04-27
+  description: |
+    Tracker de objetivos personales con sync entre dispositivos.
+
+stack:
+  language: typescript
+  runtime: node@20
+  framework: express
+  package_manager: pnpm
+  addon: node-ts
+
+data:
+  primary_db: ~       # todavía no decidido; va a Postgres cuando lo necesite
+  cache: ~
+  storage: ~
+
+infra:
+  cloud: ~
+  region: ~
+  deployment: ~
+
+auth:
+  provider: ~
+  strategy: ~
+
+compliance:
+  required: false
+  frameworks: []
+
+addons:
+  - node-ts
+
+decisions: []
+
+docs:
+  wiki_path: vibe-tracker.wiki/
+  runbooks_path: ~
+  decisions_path: docs/decisions/

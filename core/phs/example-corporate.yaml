@@ -1,0 +1,61 @@
+# PHS · Ejemplo · Corporate / fintech en modo vibe
+#
+# Caso típico: equipo dentro de una org, vertical fintech (compliance requerido
+# automáticamente), stack ya definido. Aún en vibe pero con varios campos
+# resueltos. Listo para empujar a graduating cuando se complete el resto.
+
+project:
+  name: pagos-internos
+  mode: vibe
+  type: single-team
+  vertical: fintech
+  tier: corporate
+  created_at: 2026-04-27
+  description: |
+    Servicio interno de orquestación de pagos para clientes B2B.
+
+stack:
+  language: typescript
+  runtime: node@20
+  framework: express
+  package_manager: pnpm
+  addon: node-ts
+
+data:
+  primary_db: postgres
+  cache: redis
+  storage: s3
+
+infra:
+  cloud: aws
+  region: us-east-1
+  deployment: container
+
+auth:
+  provider: cognito
+  strategy: oauth
+
+compliance:
+  required: true
+  frameworks:
+    - pci-dss
+    - soc2
+
+addons:
+  - node-ts
+  - compliance
+
+decisions:
+  - id: "0001"
+    title: stack-base-typescript-node
+    file: docs/decisions/0001-stack-base.md
+    status: accepted
+  - id: "0002"
+    title: postgres-rds-multi-az
+    file: docs/decisions/0002-postgres-rds.md
+    status: accepted
+
+docs:
+  wiki_path: pagos-internos.wiki/
+  runbooks_path: ~     # pendiente para graduating
+  decisions_path: docs/decisions/

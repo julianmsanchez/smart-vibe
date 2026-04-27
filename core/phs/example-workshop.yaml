@@ -1,0 +1,54 @@
+# PHS · Ejemplo · Team dentro de un workshop (multi-team monorepo)
+#
+# Este archivo vive en `apps/team-checkout/phs.yaml` dentro de un monorepo
+# `hackathon-2026/`. Referencia el `workshop.yaml` global vía `workshop.ref`.
+
+project:
+  name: team-checkout
+  mode: vibe
+  type: workshop
+  vertical: general
+  tier: startup
+  created_at: 2026-04-27
+  description: |
+    Team de checkout dentro del workshop hackathon-2026.
+    Usa packages compartidos del monorepo: design-system, types, auth.
+
+workshop:
+  ref: ../../workshop.yaml
+  team_id: team-checkout
+
+stack:
+  language: typescript
+  runtime: node@20
+  framework: next        # apps de team usan Next con shell del workshop
+  package_manager: pnpm
+  addon: workshop
+
+data:
+  primary_db: ~          # se define en workshop.yaml.shared_infra.databases
+  cache: ~
+  storage: ~
+
+infra:
+  cloud: ~
+  region: ~
+  deployment: ~
+
+auth:
+  provider: ~             # usa @workshop/auth del monorepo
+  strategy: ~
+
+compliance:
+  required: false
+  frameworks: []
+
+addons:
+  - workshop
+
+decisions: []
+
+docs:
+  wiki_path: ~            # workshops suelen compartir wiki en raíz
+  runbooks_path: ~
+  decisions_path: docs/decisions/

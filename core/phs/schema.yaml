@@ -1,0 +1,186 @@
+# PHS — Prototype Handoff Spec — schema canónico v1
+#
+# Este archivo es la fuente de verdad LEGIBLE del schema PHS.
+# La versión TÉCNICA (importable, ejecutable) vive en `schema.ts` (Zod).
+# Cuando hay diff, manda `schema.ts`; este archivo se mantiene en paralelo.
+#
+# Ver también:
+#   - docs/framework/03-phs-spec.md (descripción metodológica)
+#   - core/phs/validation-rules.md (reglas semánticas y por modo)
+#   - core/phs/example-*.yaml (ejemplos válidos)
+
+schema_version: "1.0"
+
+fields:
+
+  # === Identidad y modo ===
+  project:
+    type: object
+    required: true
+    properties:
+      name:
+        type: string
+        required: true
+        pattern: "^[a-z0-9][a-z0-9-_]*$"
+        description: "Slug del proyecto. Lowercase, sin espacios."
+      mode:
+        type: enum
+        required: true
+        values: [vibe, graduating, production]
+        description: "Modo activo. Determina qué validaciones aplican."
+      type:
+        type: enum
+        required: true
+        values: [single-team, workshop]
+      vertical:
+        type: enum
+        required: true
+        values: [general, fintech, salud, retail, edu, gobierno, telecom, otro]
+      tier:
+        type: enum
+        required: true
+        values: [startup, corporate]
+      created_at:
+        type: date
+        required: true
+        format: "YYYY-MM-DD"
+      description:
+        type: string
+        required: false
+        description: "Una línea opcional sobre qué hace el proyecto."
+
+  # === Referencia a workshop (solo si type=workshop) ===
+  workshop:
+    type: object
+    required: false  # solo presente si project.type=workshop
+    properties:
+      ref:
+        type: string
+        required: true
+        description: "Path relativo al workshop.yaml del monorepo."
+      team_id:
+        type: string
+        required: false
+        description: "ID del team si esta app pertenece a uno."
+
+  # === Stack ===
+  stack:
+    type: object
+    required: true
+    properties:
+      language:
+        type: enum
+        required: true
+        values: [typescript, javascript, python, go, rust, otro]
+      runtime:
+        type: string
+        required: true
+        description: "ej: node@20, python@3.12, go@1.22"
+      framework:
+        type: string
+        required: true
+        description: "ej: express, hono, next, fastapi, gin"
+      package_manager:
+        type: enum
+        required: true
+        values: [pnpm, npm, yarn, bun, pip, poetry, uv, gomod, cargo]
+      addon:
+        type: enum
+        required: true
+        values: [node-ts, workshop]
+
+  # === Persistencia ===
+  data:
+    type: object
+    required: true  # objeto presente; campos pueden ser null
+    properties:
+      primary_db:
+        type: nullable_string
+        description: "ej: postgres, mysql, sqlite, mongodb. ~ en vibe."
+      cache:
+        type: nullable_string
+        description: "ej: redis, memcached, in-memory. ~ en vibe."
+      storage:
+        type: nullable_string
+        description: "ej: s3, gcs, r2, local-fs. ~ en vibe."
+
+  # === Hosting / infra ===
+  infra:
+    type: object
+    required: true
+    properties:
+      cloud:
+        type: nullable_enum
+        values: [aws, gcp, azure, vercel, cloudflare, fly, railway, render, otro, null]
+      region:
+        type: nullable_string
+      deployment:
+        type: nullable_enum
+        values: [serverless, container, vm, static, edge, null]
+
+  # === Auth ===
+  auth:
+    type: object
+    required: true
+    properties:
+      provider:
+        type: nullable_enum
+        values: [supabase-auth, auth0, cognito, clerk, firebase-auth, custom, otro, null]
+      strategy:
+        type: nullable_enum
+        values: [oauth, password, magic-link, passkeys, sso, null]
+
+  # === Compliance ===
+  compliance:
+    type: object
+    required: true
+    properties:
+      required:
+        type: boolean
+        required: true
+        description: "Auto-true si vertical in [fintech, salud] o tier=corporate."
+      frameworks:
+        type: array
+        items: enum
+        values: [pci-dss, hipaa, soc2, gdpr, lgpd, iso-27001, otro]
+
+  # === Addons activos ===
+  addons:
+    type: array
+    required: true
+    min_items: 1
+    items: enum
+    values: [node-ts, workshop, compliance, observability-extra]
+
+  # === Decisiones grandes (referencia a ADRs) ===
+  decisions:
+    type: array
+    required: true  # array presente; puede estar vacío en vibe
+    items:
+      type: object
+      properties:
+        id: { type: string, required: true }   # ej: "0001"
+        title: { type: string, required: true }
+        file: { type: string, required: true }   # path relativo al ADR
+        status:
+          type: enum
+          values: [proposed, accepted, deprecated, superseded]
+
+  # === SLA (solo si mode=production) ===
+  sla:
+    type: object
+    required: false  # obligatorio cuando mode=production
+    properties:
+      uptime_target: { type: nullable_string }   # ej: "99.5%"
+      rto: { type: nullable_string }
+      rpo: { type: nullable_string }
+      business_hours: { type: nullable_string }
+
+  # === Wiki / docs ===
+  docs:
+    type: object
+    required: true
+    properties:
+      wiki_path: { type: nullable_string }
+      runbooks_path: { type: nullable_string }    # obligatorio en graduating
+      decisions_path: { type: nullable_string }
