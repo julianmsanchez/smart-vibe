@@ -1,0 +1,171 @@
+# Workshop Spec — schema canónico v1
+#
+# SSOT cross-cutting a nivel monorepo del addon `workshop`. Este archivo es
+# la fuente de verdad LEGIBLE; la versión TÉCNICA vive en `schema.ts`.
+# Cuando difieren, manda `schema.ts`.
+#
+# Ver:
+#   - docs/framework/10-workshop-mode.md
+#   - core/workshop-spec/validation-rules.md
+#   - core/workshop-spec/example-hackathon.yaml
+
+schema_version: "1.0"
+
+fields:
+
+  workshop:
+    type: object
+    required: true
+    properties:
+
+      name:
+        type: string
+        required: true
+        pattern: "^[a-z0-9][a-z0-9-_]*$"
+
+      type:
+        type: enum
+        required: true
+        values: [hackathon, corporate-squads, multi-product]
+
+      mode:
+        type: enum
+        required: true
+        values: [vibe, graduating, production]
+
+      shell:
+        type: object
+        required: true
+        properties:
+          framework: { type: string, required: true }     # ej: "next.js"
+          mounts_teams_at: { type: string, required: true } # ej: "/{team_id}"
+          theme_provider_pkg: { type: string, required: true } # ej: "@workshop/design-system/theme"
+
+      teams:
+        type: array
+        required: true
+        min_items: 1
+        items:
+          type: object
+          properties:
+            id: { type: string, required: true, pattern: "^[a-z0-9][a-z0-9-_]*$" }
+            members: { type: array, items: string, required: true }
+            domain: { type: string, required: true }     # ej: "checkout"
+            app_path: { type: string, required: true }   # ej: "apps/team-1"
+            api_prefix: { type: string, required: true } # ej: "/api/team-1"
+
+      shared_infra:
+        type: object
+        required: true
+        properties:
+          apis_external:
+            type: array
+            items:
+              type: object
+              properties:
+                name: { type: string, required: true }
+                env_var: { type: string, required: true }
+                access: { type: array, items: string }    # team ids autorizados; vacío = ninguno
+                budget_usd_monthly: { type: nullable_number }
+
+          databases:
+            type: object
+            required: true
+            properties:
+              strategy:
+                type: enum
+                required: true
+                values: [shared-schema-isolated-rows, schema-per-team, db-per-team]
+              url_env: { type: string, required: true }    # ej: "DATABASE_URL"
+              migrations_owner: { type: string, required: true } # team-id o "shell"
+              isolation:
+                type: enum
+                values: [row-level-security, none]
+
+          storage:
+            type: array
+            items:
+              type: object
+              properties:
+                bucket: { type: string, required: true }
+                provider:
+                  type: enum
+                  values: [s3, gcs, r2, azure-blob, local-fs]
+                access: { type: array, items: string }
+
+          queues_buses:
+            type: array       # vacío en v0.1.0; reservado para Fase 2
+            items: object
+
+          secrets:
+            type: object
+            required: true
+            properties:
+              shared_file: { type: string, required: true }  # ej: ".env.shared.example"
+              strategy:
+                type: enum
+                required: true
+                values: [dotenv-local, aws-secrets-manager, vault, doppler]
+              rotation_owner: { type: string, required: true }
+
+          observability:
+            type: object
+            required: true
+            properties:
+              logger:
+                type: enum
+                required: true
+                values: [pino, winston, bunyan, otro]
+              log_format:
+                type: enum
+                required: true
+                values: [json, pretty]
+              correlation_header: { type: string, required: true } # ej: "x-correlation-id"
+              destination:
+                type: enum
+                required: true
+                values: [stdout, cloudwatch, datadog, loki, otro]
+              metrics_enabled: { type: boolean, required: true }
+
+      ui_shared:
+        type: object
+        required: true
+        properties:
+          design_system_pkg: { type: string, required: true }   # ej: "@workshop/design-system"
+          tokens_path: { type: string, required: true }
+          components_path: { type: string, required: true }
+          assets_path: { type: string, required: true }
+
+      fixtures:
+        type: object
+        required: true
+        properties:
+          seeds_path: { type: string, required: true }
+          mocks_strategy:
+            type: enum
+            required: true
+            values: [msw, none]
+
+      versioning:
+        type: object
+        required: true
+        properties:
+          strategy:
+            type: enum
+            required: true
+            values: [workspace-protocol, semver-internal]
+          breaking_change_policy: { type: string, required: true } # texto libre
+
+      ci_cd:
+        type: object
+        required: true
+        properties:
+          integration_check:
+            type: enum
+            required: true
+            values: [enabled, disabled]
+          deployment_strategy:
+            type: enum
+            required: true
+            values: [independent-per-team, monolithic, hybrid]
+          rollback_owner: { type: string, required: true }

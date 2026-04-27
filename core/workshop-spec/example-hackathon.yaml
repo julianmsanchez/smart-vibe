@@ -1,0 +1,87 @@
+# Workshop Spec · Ejemplo · Hackathon de 3 teams
+#
+# Caso típico: hackathon de 3 días, 3 teams compartiendo design system, auth,
+# Postgres con RLS y un shell Next.js que monta cada team en /{team_id}.
+
+workshop:
+  name: hackathon-2026
+  type: hackathon
+  mode: vibe
+
+  shell:
+    framework: next.js
+    mounts_teams_at: "/{team_id}"
+    theme_provider_pkg: "@workshop/design-system/theme"
+
+  teams:
+    - id: team-checkout
+      members: [alice, bob]
+      domain: checkout
+      app_path: apps/team-checkout
+      api_prefix: /api/team-checkout
+
+    - id: team-search
+      members: [carla, dani]
+      domain: search
+      app_path: apps/team-search
+      api_prefix: /api/team-search
+
+    - id: team-recs
+      members: [eve, frank, gina]
+      domain: recommendations
+      app_path: apps/team-recs
+      api_prefix: /api/team-recs
+
+  shared_infra:
+    apis_external:
+      - name: openai
+        env_var: OPENAI_API_KEY
+        access: [team-search, team-recs]
+        budget_usd_monthly: 50
+
+    databases:
+      strategy: shared-schema-isolated-rows
+      url_env: DATABASE_URL
+      migrations_owner: shell
+      isolation: row-level-security
+
+    storage:
+      - bucket: workshop-uploads
+        provider: s3
+        access: [team-checkout]
+
+    queues_buses: []
+
+    secrets:
+      shared_file: .env.shared.example
+      strategy: dotenv-local
+      rotation_owner: shell
+
+    observability:
+      logger: pino
+      log_format: json
+      correlation_header: x-correlation-id
+      destination: stdout
+      metrics_enabled: false
+
+  ui_shared:
+    design_system_pkg: "@workshop/design-system"
+    tokens_path: packages/design-system/tokens
+    components_path: packages/design-system/components
+    assets_path: packages/design-system/assets
+
+  fixtures:
+    seeds_path: packages/fixtures/seeds
+    mocks_strategy: msw
+
+  versioning:
+    strategy: workspace-protocol
+    breaking_change_policy: |
+      Breaking change a un package compartido bloquea PR hasta que todos
+      los teams afectados migren. Se etiqueta con `breaking-change` y se
+      coordina por canal `#workshop-eng`.
+
+  ci_cd:
+    integration_check: enabled
+    deployment_strategy: independent-per-team
+    rollback_owner: shell
