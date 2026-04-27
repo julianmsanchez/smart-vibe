@@ -5,7 +5,12 @@
  * de workshop.yaml. Cuando el shell madure, leer dinámicamente.
  */
 
-const teams = [
+interface Team {
+  id: string;
+  domain: string;
+}
+
+const teams: Team[] = [
   // ej: { id: 'team-checkout', domain: 'checkout' }
 ];
 
@@ -15,7 +20,7 @@ export default function HomePage() {
       <h1>{{PROJECT_NAME}}</h1>
       <p>Workshop monorepo. Teams disponibles:</p>
       <ul>
-        {teams.map((t: { id: string; domain: string }) => (
+        {teams.map((t) => (
           <li key={t.id}>
             <a href={`/${t.id}`}>
               {t.id} — {t.domain}

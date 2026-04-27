@@ -13,13 +13,14 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "react": "^18.3.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",
+    "@workshop/config": "workspace:*",
     "typescript": "^5.6.0",
     "vitest": "^2.0.0"
   },

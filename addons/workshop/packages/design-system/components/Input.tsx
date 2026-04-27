@@ -5,7 +5,7 @@
 import type { InputHTMLAttributes } from 'react';
 import { tokens } from '../tokens';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
+export type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
 export function Input({ style, ...rest }: InputProps) {
   const base: React.CSSProperties = {

@@ -1,0 +1,7 @@
+{
+  "extends": "@workshop/config/tsconfig",
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*", "tokens/**/*", "theme/**/*", "components/**/*"]
+}

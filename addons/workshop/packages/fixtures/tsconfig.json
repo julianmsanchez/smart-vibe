@@ -1,0 +1,4 @@
+{
+  "extends": "@workshop/config/tsconfig",
+  "include": ["src/**/*", "seeds/**/*", "msw-handlers/**/*"]
+}
