@@ -1,0 +1,209 @@
+# CLAUDE.md — {{PROJECT_NAME}}
+
+> Este archivo orienta a cualquier agente (Claude Code u otro) que trabaje en este proyecto. Es la **constitución operativa** del repo: convenciones, comandos, decisiones que no cambian. Si una instrucción de este archivo contradice algo del prompt, gana este archivo.
+
+---
+
+## Identidad del proyecto
+
+- **Nombre:** {{PROJECT_NAME}}
+- **Tipo:** {{TYPE}}                    <!-- single-team | workshop -->
+- **Modo:** {{MODE}}                    <!-- vibe | graduating | production -->
+- **Vertical:** {{VERTICAL}}
+- **Tier:** {{TIER}}                    <!-- startup | corporate -->
+- **Addon de stack:** {{ADDON}}         <!-- node-ts | workshop -->
+- **Idioma del repo:** español por defecto. Strings de código (logs, identificadores) en inglés.
+
+> Para detalles operativos del proyecto (arquitectura, decisiones, runbooks) ver `docs/`. Para metodología (modos, dimensiones, pipeline) ver framework de smart-vibe en https://github.com/julianmsanchez/smart-vibe (o local si fuiste scaffoldeado).
+
+---
+
+## Stack
+
+- **Lenguaje:** {{LANGUAGE}}
+- **Runtime:** {{RUNTIME}}
+- **Framework:** {{FRAMEWORK}}
+- **Package manager:** {{PACKAGE_MANAGER}}
+- **Tests:** {{TEST_RUNNER}}
+- **Linter/formatter:** ESLint + Prettier
+
+Detalle completo en `phs.yaml`.
+
+---
+
+## SSOT (Single Source of Truth)
+
+Este proyecto tiene **un PHS** (`phs.yaml`) en la raíz. Es el contrato que declara qué es el proyecto. Cualquier herramienta del framework lee de ahí.
+
+- ¿Editar metadata del proyecto? Editar `phs.yaml`.
+- ¿Validar PHS? `bash <smart-vibe>/scripts/doctor.sh phs validate phs.yaml` o `/smart-phs validate`.
+- Cuando estés cerca de graduar, completar todos los campos críticos.
+
+<!-- WORKSHOP-ONLY: descomenta si type=workshop -->
+<!--
+**Workshop:** este proyecto vive en un monorepo. Hay un `workshop.yaml` global en la raíz del monorepo (un nivel arriba de `apps/{{TEAM_ID}}/`). El PHS de tu app referencia el workshop con `workshop.ref: ../../workshop.yaml`. Cambios cross-team van por `workshop.yaml`.
+-->
+
+---
+
+## Las 5 Reglas de Oro (modo vibe)
+
+Estas son las **únicas reglas obligatorias** mientras el modo sea `vibe`. Si las cumplís, el proyecto está saludable.
+
+1. **Tenés un PHS y declarás tu modo.** `phs.yaml` con campos críticos llenos.
+2. **No hay secretos en el repo.** `.env` ignorado, `.env.example` actualizado.
+3. **Hay git desde el primer minuto, con Conventional Commits.** Nada de `wip` permanente.
+4. **Hay README + CLAUDE.md mínimos.** Cualquiera entiende qué corre y cómo en <5 min.
+5. **Las decisiones grandes son visibles.** En commit message, en el PHS o en una ADR.
+
+Detalle: `04-golden-rules.md` del framework.
+
+---
+
+## Convenciones git
+
+- **Conventional Commits obligatorio:** `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:`, `perf:`, `build:`.
+- **Granularidad:** un commit por **bundle coherente**, no por archivo suelto.
+- **Branch principal:** `main`. PR se mergea a `main` cuando aplica (en MVP, push directo a `main` está OK si sos el único builder).
+- **NO `--amend` salvo pedido explícito.** Si un hook falla, fix + nuevo commit.
+- **NO `--no-verify`.** Investigar el hook que falla.
+- **NO `git push --force` a `main`.** Reescribir history publicado es destructivo.
+
+### Ejemplo de commit message
+
+```
+feat(auth): add magic link login flow
+
+- Razón: reduce fricción de signup en hackathon.
+- Trade-off: depende de email reliable; agregamos retry exponencial.
+- ADR pendiente: 0008-auth-strategy.md.
+
+Closes #42
+```
+
+---
+
+## Comandos importantes
+
+```bash
+# Setup
+{{PACKAGE_MANAGER}} install
+cp .env.example .env       # editar con valores reales
+
+# Desarrollo
+{{PACKAGE_MANAGER}} dev
+{{PACKAGE_MANAGER}} test
+{{PACKAGE_MANAGER}} lint
+
+# Build
+{{PACKAGE_MANAGER}} build
+
+# Validar PHS
+{{PHS_VALIDATE_CMD}}
+```
+
+<!-- WORKSHOP-ONLY -->
+<!--
+### Comandos del monorepo (workshop)
+
+```bash
+pnpm install                                    # desde la raíz del monorepo
+pnpm turbo dev --filter=shell --filter=...{{TEAM_ID}}   # shell + tu team
+pnpm turbo build --filter=...{{TEAM_ID}}        # solo tu team y deps
+pnpm turbo test                                 # todos los teams
+```
+-->
+
+---
+
+## Estructura del repo
+
+```
+{{PROJECT_NAME}}/
+├── phs.yaml              # SSOT del proyecto
+├── README.md
+├── CLAUDE.md             # este archivo
+├── .env.example          # plantilla de variables — copialo a .env
+├── .gitignore
+├── package.json
+├── tsconfig.json
+├── src/                  # código
+├── tests/                # tests
+├── docs/
+│   ├── decisions/        # ADRs
+│   ├── policies/         # 7 policies (modo vibe)
+│   └── runbooks/         # solo cuando entres a graduating
+└── ...
+```
+
+<!-- WORKSHOP-ONLY -->
+<!--
+En workshop, tu app vive en `apps/{{TEAM_ID}}/`. La estructura arriba aplica a esa carpeta. La raíz del monorepo tiene `workshop.yaml`, `apps/`, `packages/` y `docs/workshop/`.
+-->
+
+---
+
+## Policies en modo vibe
+
+Hay 7 policies en `docs/policies/`, una por **dimensión de auditoría** del framework. En modo vibe son **principios + checklist liviano**, no gates obligatorios.
+
+| Policy | Foco |
+|---|---|
+| `01-security.md` | Secretos, auth, validación de inputs |
+| `02-architecture.md` | Estructura, separación, ADRs |
+| `03-code-quality.md` | Linter, tipos, tests |
+| `04-data.md` | Modelo, migraciones, backup |
+| `05-ops.md` | Logs, métricas, deploy |
+| `06-docs.md` | README, ADRs, runbooks |
+| `07-change-control.md` | Commits, branching, releases |
+
+Cuando entres a `graduating` (vía `celeru-pro`), estas policies se vuelven gates.
+
+---
+
+## Cuando dudes
+
+1. **Sobre algo del proyecto** → leé `phs.yaml`, `README.md`, ADRs en `docs/decisions/`.
+2. **Sobre cómo proceder** → revisá `docs/policies/` para la dimensión que aplica.
+3. **Sobre el framework** → docs de smart-vibe (`docs/framework/` del toolkit).
+4. **Si no encontrás respuesta** → preguntá al humano antes de improvisar.
+
+Para cambios estructurales (nueva dependencia mayor, refactor grande, cambio de stack, decisión arquitectónica) → escribir una ADR en `docs/decisions/000X-<slug>.md` antes (o junto con) el código.
+
+---
+
+## Antes de declarar listo el proyecto para producción
+
+1. Completar `phs.yaml` (todos los campos críticos llenos).
+2. Cumplir las 5 reglas de oro.
+3. Pasar `bash <smart-vibe>/scripts/doctor.sh` (modo vibe).
+4. Considerar `/smart-graduate` para empezar la transición a producción.
+
+`/smart-graduate` orienta a `celeru-pro` (privado) o a implementar el pipeline manualmente siguiendo `docs/framework/06-pipeline.md` del toolkit.
+
+---
+
+<!-- WORKSHOP-ONLY -->
+<!--
+## Como team del workshop
+
+- Tu app es independiente operativamente, pero **comparte tooling, types, design-system y auth** con los otros teams.
+- Cambios a packages compartidos (`@workshop/design-system`, `@workshop/types`, etc.) van por **PR único** que actualiza package + consumidores.
+- Si tenés que cambiar algo en infra compartida (DB, secrets, observability), editá `workshop.yaml` y avisá a los otros teams.
+- Comunicación cross-team: HTTP via `@workshop/api-contracts`. NO importes directo de otra app.
+-->
+
+---
+
+## Cosas que NO hacemos en este repo
+
+- No commiteamos secretos, ni en código ni en `.env`.
+- No deshabilitamos linters / typescript strict / tests sin ADR.
+- No hacemos refactors grandes sin commit atómico que los aísle.
+- No cambiamos el `mode` del PHS sin pasar por la transición correspondiente.
+- No usamos `git push --force` a branches publicadas.
+
+---
+
+> Generado por `bash scripts/bootstrap.sh` de smart-vibe v{{SMART_VIBE_VERSION}}.
+> Editá libremente. Si querés mantener el archivo cerca del template original, no toques las secciones marcadas con `<!-- WORKSHOP-ONLY -->`.
