@@ -102,14 +102,30 @@ case "$SECRETS_STRATEGY" in
         echo "⚠ $SHARED_FILE no existe; saltando creación de .env.shared." >&2
       fi
     fi
+
+    # Layer team-specific: apps/<team>/.env.local desde su .example.
+    TEAM_ENV_EXAMPLE="apps/$TEAM_ID/.env.local.example"
+    TEAM_ENV="apps/$TEAM_ID/.env.local"
+    if [[ -f "$TEAM_ENV_EXAMPLE" ]]; then
+      if [[ -f "$TEAM_ENV" ]]; then
+        ok "$TEAM_ENV ya existe (no se sobrescribe)"
+      else
+        cp "$TEAM_ENV_EXAMPLE" "$TEAM_ENV"
+        ok "Creado $TEAM_ENV a partir de $TEAM_ENV_EXAMPLE"
+      fi
+    else
+      echo "⚠ $TEAM_ENV_EXAMPLE no existe; saltando creación de $TEAM_ENV." >&2
+    fi
     ;;
   doppler)
     info "secrets.strategy=doppler — TODO Fase 2."
     info "Por ahora caete a dotenv-local manualmente: cp $SHARED_FILE .env.shared"
+    info "Y para el team: cp apps/$TEAM_ID/.env.local.example apps/$TEAM_ID/.env.local"
     ;;
   sops-encrypted)
     info "secrets.strategy=sops-encrypted — TODO Fase 2."
     info "Por ahora caete a dotenv-local manualmente: cp $SHARED_FILE .env.shared"
+    info "Y para el team: cp apps/$TEAM_ID/.env.local.example apps/$TEAM_ID/.env.local"
     ;;
   *)
     info "secrets.strategy desconocida: $SECRETS_STRATEGY (saltando)."
@@ -133,20 +149,28 @@ else
   exit 1
 fi
 
-# --- vars requeridas para este team ---
-VARS_REQUIRED=$(yq_get "
-'\n'.join(
-    sorted({
+# --- vars requeridas, separadas en globales vs team-specific ---
+# Globales: databases.url_env + apis_external[] sin access (o access vacío).
+VARS_GLOBAL=$(yq_get "
+'\n'.join(sorted(
+    {
         a.get('env_var', '')
         for a in (d['workshop'].get('shared_infra', {}).get('apis_external') or [])
-        if a.get('env_var') and (
-            not a.get('access') or '$TEAM_ID' in a.get('access', [])
-        )
+        if a.get('env_var') and not a.get('access')
     } | (
         {d['workshop']['shared_infra']['databases'].get('url_env', '')}
         if d['workshop'].get('shared_infra', {}).get('databases', {}).get('url_env') else set()
-    ))
-)
+    )
+))
+")
+
+# Team-specific: apis_external[] con access que incluya este TEAM_ID.
+VARS_TEAM=$(yq_get "
+'\n'.join(sorted({
+    a.get('env_var', '')
+    for a in (d['workshop'].get('shared_infra', {}).get('apis_external') or [])
+    if a.get('env_var') and '$TEAM_ID' in (a.get('access') or [])
+}))
 ")
 
 # --- next-steps ---
@@ -157,10 +181,20 @@ echo "============================================"
 echo ""
 echo "Próximos pasos:"
 echo ""
-echo "  1) Llená .env.shared con los secrets que el organizer compartió."
-if [[ -n "$VARS_REQUIRED" ]]; then
-  echo "     Variables requeridas (según workshop.yaml):"
-  echo "$VARS_REQUIRED" | sed 's/^/       - /'
+echo "  1) Llená los .env con los valores que el organizer compartió."
+echo ""
+echo "     a) .env.shared (vars globales, todos los teams):"
+if [[ -n "$VARS_GLOBAL" ]]; then
+  echo "$VARS_GLOBAL" | sed 's/^/         - /'
+else
+  echo "         (sin vars globales declaradas en workshop.yaml)"
+fi
+echo ""
+echo "     b) apps/$TEAM_ID/.env.local (vars team-specific de $TEAM_ID):"
+if [[ -n "$VARS_TEAM" ]]; then
+  echo "$VARS_TEAM" | sed 's/^/         - /'
+else
+  echo "         (sin vars team-specific declaradas; este team es 100% global)"
 fi
 echo ""
 echo "  2) Levantá tu app + el shell:"
