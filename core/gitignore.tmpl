@@ -1,0 +1,88 @@
+# .gitignore — proyecto {{PROJECT_NAME}} ({{TYPE}}, modo {{MODE}})
+# Generado por smart-vibe v{{SMART_VIBE_VERSION}}. Editá libremente.
+
+# ---- Secretos y entornos ----
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+*.pem
+*.key
+secrets/
+credentials/
+
+# ---- Dependencias ----
+node_modules/
+.pnpm-store/
+.yarn/cache/
+.yarn/install-state.gz
+.npm/
+
+# ---- Builds y caches ----
+dist/
+build/
+out/
+.next/
+.turbo/
+.cache/
+.parcel-cache/
+.swc/
+coverage/
+*.tsbuildinfo
+
+# ---- Logs ----
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ---- IDE / editores ----
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ---- Claude Code ----
+.claude/settings.local.json
+.claude/cache/
+.claude/state/
+
+# ---- Wiki paralela ----
+# La wiki vive en `wiki/` paralela. Por default se commitea (es parte del
+# proyecto). Si tu equipo prefiere mantenerla privada, descomentar:
+# wiki/
+
+# ---- Testing artifacts ----
+.nyc_output/
+junit.xml
+test-results/
+playwright-report/
+
+# ---- OS / temp ----
+*.tmp
+*.bak
+.tmp/
+.temp/
+
+# ---- Terraform / IaC (si aplica) ----
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ---- Python virtualenvs (si el addon los usa) ----
+.venv/
+__pycache__/
+*.pyc
+
+# ---- Custom (agregá lo específico de tu proyecto debajo) ----
