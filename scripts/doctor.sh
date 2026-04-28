@@ -80,6 +80,31 @@ cmd_general() {
     if [[ -f workshop.yaml ]]; then
       ok "workshop.yaml presente (proyecto type=workshop)"
       cmd_workshop_validate workshop.yaml
+
+      # 2.a. Campos pendientes del workshop.yaml (warns guiando al checklist).
+      grep -qE "^[[:space:]]*apis_external:[[:space:]]*\[\]" workshop.yaml \
+        && warn "workshop.yaml: apis_external está vacío. Ver ORGANIZER-CHECKLIST.md paso 1."
+      grep -qE "^[[:space:]]*storage:[[:space:]]*\[\]" workshop.yaml \
+        && warn "workshop.yaml: storage está vacío (OK si ningún team lo usa)."
+      grep -qE "^[[:space:]]*members:[[:space:]]*\[\]" workshop.yaml \
+        && warn "workshop.yaml: teams[].members con entries vacías. Ver checklist paso 1."
+      grep -qE "^[[:space:]]*domain:[[:space:]]*~" workshop.yaml \
+        && warn "workshop.yaml: teams[].domain sin completar. Ver checklist paso 1."
+
+      # 2.b. Env files presentes (modelo two-layer).
+      if [[ -f .env.shared.example ]]; then
+        ok ".env.shared.example presente (capa global)"
+      else
+        warn ".env.shared.example ausente (esperado en workshop)."
+      fi
+      for team_app in apps/*/; do
+        case "$team_app" in
+          apps/_team-template/|apps/shell/) continue ;;
+        esac
+        if [[ ! -f "${team_app}.env.local.example" ]]; then
+          warn "${team_app}.env.local.example ausente (capa team-specific)."
+        fi
+      done
     else
       fail "type=workshop pero falta workshop.yaml"
     fi
