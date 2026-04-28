@@ -165,12 +165,13 @@ if [[ "$TYPE" == "workshop" ]]; then
     chmod +x "$TARGET_DIR/scripts/join.sh"
   fi
 
-  # doctor.sh viaja embebido en el monorepo (referenciado por
-  # ORGANIZER-CHECKLIST y next-steps). Single source: scripts/doctor.sh
-  # del toolkit; lo copiamos en runtime para evitar drift por
-  # duplicación del archivo en el repo.
+  # doctor.sh y sync-env.sh viajan embebidos en el monorepo (referenciados
+  # por ORGANIZER-CHECKLIST y next-steps). Single source: scripts/ del
+  # toolkit; los copiamos en runtime para evitar drift por duplicación.
   cp "$REPO_ROOT/scripts/doctor.sh" "$TARGET_DIR/scripts/doctor.sh"
   chmod +x "$TARGET_DIR/scripts/doctor.sh"
+  cp "$REPO_ROOT/scripts/sync-env.sh" "$TARGET_DIR/scripts/sync-env.sh"
+  chmod +x "$TARGET_DIR/scripts/sync-env.sh"
 
   # team-CLAUDE.md.tmpl tiene placeholders por team ({{TEAM_ID}}, etc.) que el
   # render genérico no conoce. Lo stasheamos fuera del proyecto y lo

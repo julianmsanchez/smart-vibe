@@ -29,34 +29,30 @@ bash scripts/doctor.sh workshop validate workshop.yaml
 bash scripts/doctor.sh   # warns sobre los campos pendientes
 ```
 
-## 2. Completar los archivos `.env` de ejemplo (modelo two-layer)
+## 2. Sincronizar archivos `.env.*.example` desde `workshop.yaml`
 
-Hay **dos capas** de configuración. El mapeo lo decide
-`workshop.yaml.shared_infra.apis_external[].access`.
+El modelo es **two-layer**: globales en `.env.shared.example` (commiteado,
+raíz) + team-specific en `apps/<team>/.env.local.example` (commiteado, por
+team). El mapeo lo decide `workshop.yaml.shared_infra.apis_external[].access`:
 
-### 2.a. Globales — `.env.shared.example` (commiteado, raíz del monorepo)
+- `access: []` (o ausente) → var **global** (todos los teams).
+- `access: [team-id, ...]` → var **team-specific** (sólo esos teams).
 
-Vars que TODOS los teams necesitan. Ya viene con defaults razonables:
-- `DATABASE_URL`, `NODE_ENV`, `SHELL_PORT`, `LOG_LEVEL`, `CORRELATION_HEADER`, `MOCKS`.
-- Cualquier `apis_external[]` con `access: []` (vacío) o sin `access` declarado.
+Una vez completado el paso 1, regenerar los `.env.*.example` con un solo comando:
 
-- [ ] Verificar que las vars listadas matcheen las vars realmente globales
-      en tu `workshop.yaml`.
-- [ ] Agregar las que falten (cada `apis_external[].env_var` con
-      `access` vacío).
+```bash
+bash scripts/sync-env.sh
+```
 
-### 2.b. Team-specific — `apps/<team>/.env.local.example` (commiteado, por team)
+Esto reescribe **únicamente el bloque `# --- BEGIN AUTO-GENERATED ... ---`**
+en cada archivo. Las vars manuales (NODE_ENV, SHELL_PORT, etc.) y los
+comentarios fuera del bloque quedan intactos.
 
-Vars que SÓLO un team (o un subset) usa. Ejemplos:
-- `apps/checkout/.env.local.example`: `STRIPE_API_KEY=` (sólo checkout).
-- `apps/search/.env.local.example`: `OPENAI_API_KEY=` (sólo search).
-- `apps/recs/.env.local.example`: `OPENAI_API_KEY=` (también recs).
-
-Para cada team en `apps/{{TEAMS_LIST}}/`:
-- [ ] Editar `.env.local.example` listando las vars de
-      `apis_external[]` donde el team está en `access`.
-- [ ] Si el team no tiene vars team-specific, dejar el archivo con sólo el
-      comentario placeholder (no borrarlo: mantiene el contrato declarativo).
+- [ ] Correr `bash scripts/sync-env.sh` y revisar el output (debería
+      sincronizar 1 archivo global + N archivos team).
+- [ ] Verificar `.env.shared.example` y `apps/<team>/.env.local.example`
+      con `git diff` para confirmar que las vars listadas coinciden con
+      lo declarado en `workshop.yaml`.
 
 > `.env.shared.example` y `apps/<team>/.env.local.example` se commitean.
 > `.env.shared` y `apps/<team>/.env.local` están gitignored.
