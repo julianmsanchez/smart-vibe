@@ -123,20 +123,60 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
+# --- vars derivadas (para render_tmpl) ---
+# Mapeos fijos por TYPE: el toolkit hoy solo entrega 2 stacks concretos.
+# Si en el futuro hay más addons, esto se hace data-driven desde phs.yaml.
+TODAY="$(date +%Y-%m-%d)"
+LANGUAGE="typescript"
+RUNTIME="node@20+"
+TEST_RUNNER="vitest"
+TIER="startup"   # default tier del schema phs/workshop. El builder lo edita en phs.yaml si necesita "corporate".
+PHS_VALIDATE_CMD="bash scripts/doctor.sh phs validate phs.yaml"
+
+if [[ "$TYPE" == "single-team" ]]; then
+  ADDON="node-ts"
+  FRAMEWORK="express"
+else
+  ADDON="workshop"
+  FRAMEWORK="next.js"
+fi
+
+# {{DESCRIPTION}} se usa en package.json y meta tags. Si el wizard capturó
+# tagline lo reusamos; sino fallback al nombre del proyecto (siempre válido
+# como JSON / HTML).
+DESCRIPTION="${TAGLINE:-$NAME}"
+
+# Versión del toolkit (último tag git, o sha si no hay tags). Si REPO_ROOT
+# no es un repo git (caso curl-pipe-bash exótico), cae a "dev".
+SMART_VIBE_VERSION="$(git -C "$REPO_ROOT" describe --tags --always 2>/dev/null || echo "dev")"
+
 # --- helper: render template ---
 # Sustituye placeholders. Wizard fields (TAGLINE/TARGET_USER/MODULES/KPI):
 # si quedaron vacíos, se rinden como "_TODO_" para que el vibe coder vea
 # que falta llenar.
+# {{PORT}} y {{PROD_HOST}} en observability/prometheus.yml.tmpl quedan
+# literales a propósito: son específicos del deploy real, no del bootstrap.
 render_tmpl() {
   local src="$1" dst="$2"
   sed \
     -e "s|{{PROJECT_NAME}}|$NAME|g" \
     -e "s|{{MODE}}|vibe|g" \
-    -e "s|{{TIER}}|1|g" \
+    -e "s|{{TYPE}}|$TYPE|g" \
+    -e "s|{{ADDON}}|$ADDON|g" \
+    -e "s|{{TIER}}|$TIER|g" \
     -e "s|{{VERTICAL}}|$VERTICAL|g" \
+    -e "s|{{LANGUAGE}}|$LANGUAGE|g" \
+    -e "s|{{RUNTIME}}|$RUNTIME|g" \
+    -e "s|{{FRAMEWORK}}|$FRAMEWORK|g" \
+    -e "s|{{TEST_RUNNER}}|$TEST_RUNNER|g" \
     -e "s|{{PACKAGE_MANAGER}}|$PM|g" \
     -e "s|{{SHELL_OWNER}}|${SHELL_OWNER:-@TODO-shell-owner}|g" \
+    -e "s|{{TODAY}}|$TODAY|g" \
+    -e "s|{{SMART_VIBE_VERSION}}|$SMART_VIBE_VERSION|g" \
+    -e "s|{{PHS_VALIDATE_CMD}}|$PHS_VALIDATE_CMD|g" \
     -e "s|{{TAGLINE}}|${TAGLINE:-_TODO_}|g" \
+    -e "s|{{PROJECT_TAGLINE}}|${TAGLINE:-_TODO_}|g" \
+    -e "s|{{DESCRIPTION}}|$DESCRIPTION|g" \
     -e "s|{{TARGET_USER}}|${TARGET_USER:-_TODO_}|g" \
     -e "s|{{MODULES}}|${MODULES:-_TODO_}|g" \
     -e "s|{{KPI}}|${KPI:-_TODO_}|g" \
@@ -147,7 +187,7 @@ render_tmpl() {
 echo "→ Copiando templates base..."
 
 render_tmpl "$REPO_ROOT/core/templates/CLAUDE.md.tmpl" "$TARGET_DIR/CLAUDE.md"
-cp "$REPO_ROOT/core/gitignore.tmpl" "$TARGET_DIR/.gitignore"
+render_tmpl "$REPO_ROOT/core/gitignore.tmpl" "$TARGET_DIR/.gitignore"
 cp -r "$REPO_ROOT/core/wiki-skeleton" "$TARGET_DIR/wiki"
 mkdir -p "$TARGET_DIR/docs"
 cp -r "$REPO_ROOT/core/policies" "$TARGET_DIR/docs/policies"
@@ -158,7 +198,7 @@ render_tmpl "$REPO_ROOT/core/claude/settings.json.tmpl" "$TARGET_DIR/.claude/set
 echo "→ Generando phs.yaml..."
 {
   echo "# Prototype Handoff Spec — $NAME"
-  echo "# Spec: $REPO_ROOT/core/phs/schema.yaml"
+  echo "# Spec: https://github.com/julianmsanchez/smart-vibe/blob/main/core/phs/schema.yaml"
   echo "schema_version: \"1.0\""
   echo ""
   echo "project:"
@@ -166,7 +206,7 @@ echo "→ Generando phs.yaml..."
   echo "  mode: vibe"
   echo "  type: $TYPE"
   echo "  vertical: $VERTICAL"
-  echo "  tier: 1"
+  echo "  tier: $TIER"
   echo "  created_at: \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
   if [[ -n "$TAGLINE" ]]; then
     # description: opcional en el schema. La capturamos del wizard.
@@ -244,7 +284,7 @@ if [[ "$TYPE" == "workshop" ]]; then
   IFS=',' read -ra TEAM_ARR <<< "$TEAMS"
   {
     echo "# workshop.yaml — $NAME"
-    echo "# Spec: $REPO_ROOT/core/workshop-spec/schema.yaml"
+    echo "# Spec: https://github.com/julianmsanchez/smart-vibe/blob/main/core/workshop-spec/schema.yaml"
     echo "schema_version: \"1.0\""
     echo ""
     echo "workshop:"
@@ -334,6 +374,12 @@ if [[ "$TYPE" == "single-team" ]]; then
   # README.md del addon es interno (audiencia: maintainers de smart-vibe).
   # Lo eliminamos para que el heredoc user-facing más abajo lo genere.
   rm -f "$TARGET_DIR/README.md"
+
+  # doctor.sh viaja embebido (referenciado por PHS_VALIDATE_CMD y wiki).
+  # Single source: scripts/ del toolkit. Mismo patrón que workshop.
+  mkdir -p "$TARGET_DIR/scripts"
+  cp "$REPO_ROOT/scripts/doctor.sh" "$TARGET_DIR/scripts/doctor.sh"
+  chmod +x "$TARGET_DIR/scripts/doctor.sh"
 
   # Renderizar .tmpl
   while IFS= read -r -d '' tmpl; do
