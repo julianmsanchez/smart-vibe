@@ -152,6 +152,10 @@ if [[ "$TYPE" == "workshop" ]]; then
 
   cp -r "$REPO_ROOT/addons/workshop/." "$TARGET_DIR/"
 
+  # README.md del addon es interno (audiencia: maintainers de smart-vibe).
+  # Lo eliminamos para que el README.md.tmpl renderice el README user-facing.
+  rm -f "$TARGET_DIR/README.md"
+
   # --- handle templates con scope no genérico ---
   # join.sh viaja embebido en el monorepo: lee workshop.yaml en runtime, no
   # tiene placeholders. Sólo lo movemos a su nombre final y le damos permiso
@@ -177,6 +181,14 @@ if [[ "$TYPE" == "workshop" ]]; then
     render_tmpl "$tmpl" "$out"
     rm "$tmpl"
   done < <(find "$TARGET_DIR" -name '*.tmpl' -print0)
+
+  # Render {{TEAMS_LIST}} en archivos que lo usan (ORGANIZER-CHECKLIST.md).
+  # render_tmpl genérico no lo conoce porque es específico al workshop.
+  # sed -i.bak para portabilidad BSD/Linux.
+  if [[ -f "$TARGET_DIR/ORGANIZER-CHECKLIST.md" ]]; then
+    sed -i.bak "s|{{TEAMS_LIST}}|$TEAMS|g" "$TARGET_DIR/ORGANIZER-CHECKLIST.md"
+    rm -f "$TARGET_DIR/ORGANIZER-CHECKLIST.md.bak"
+  fi
 
   # Generar workshop.yaml skeleton
   IFS=',' read -ra TEAM_ARR <<< "$TEAMS"
@@ -269,6 +281,10 @@ if [[ "$TYPE" == "single-team" ]]; then
   echo "→ Copiando addon node-ts..."
   cp -r "$REPO_ROOT/addons/node-ts/." "$TARGET_DIR/"
 
+  # README.md del addon es interno (audiencia: maintainers de smart-vibe).
+  # Lo eliminamos para que el heredoc user-facing más abajo lo genere.
+  rm -f "$TARGET_DIR/README.md"
+
   # Renderizar .tmpl
   while IFS= read -r -d '' tmpl; do
     out="${tmpl%.tmpl}"
@@ -278,7 +294,11 @@ if [[ "$TYPE" == "single-team" ]]; then
 fi
 
 # --- README minimal del proyecto ---
-cat > "$TARGET_DIR/README.md" <<EOF
+# Si el addon ya generó un README.md (caso workshop con README.md.tmpl), no
+# lo sobrescribimos. El heredoc sólo aplica a single-team y a casos sin
+# README addon-aware.
+if [[ ! -f "$TARGET_DIR/README.md" ]]; then
+  cat > "$TARGET_DIR/README.md" <<EOF
 # $NAME
 
 > Proyecto generado por [smart-vibe](https://github.com/celeru/smart-vibe). Modo: \`vibe\`. Vertical: \`$VERTICAL\`.
@@ -306,6 +326,7 @@ Estás en modo \`vibe\` — prototipado con guardrails mínimos. Cuando el proye
 - [docs/policies/](./docs/policies/) — 7 policies del framework
 - [wiki/](./wiki/) — wiki paralela del proyecto
 EOF
+fi
 
 # --- git init ---
 echo "→ Inicializando git..."
@@ -325,8 +346,19 @@ echo "✓ Proyecto creado en: $TARGET_DIR"
 echo ""
 echo "Próximos pasos:"
 echo "  cd $(basename "$TARGET_DIR")"
-echo "  $PM install"
-echo "  cp .env.example .env  # editar valores"
-echo "  $PM dev"
+if [[ "$TYPE" == "workshop" ]]; then
+  echo ""
+  echo "  → Abrí ORGANIZER-CHECKLIST.md y completá los 4 pasos (~5–10 min)."
+  echo "    Cubre: workshop.yaml, .env.shared.example,"
+  echo "    apps/<team>/.env.local.example, apps/<team>/CLAUDE.md, gh repo create."
+  echo ""
+  echo "  Luego:"
+  echo "    $PM install"
+  echo "    bash scripts/doctor.sh   # verificá que no queden warns"
+else
+  echo "  $PM install"
+  echo "  cp .env.example .env  # editar valores"
+  echo "  $PM dev"
+fi
 echo ""
 echo "Cuando tengas el primer feature, completá phs.yaml.decisions[]."
