@@ -1,0 +1,151 @@
+# {{PROJECT_NAME}} — PRD (sugerido)
+
+> **Opcional en modo vibe.** Es una sugerencia para alinear scope, personas
+> y módulos antes de codear. Si vibeás solo y el alcance ya está claro en
+> tu cabeza, podés borrar este archivo sin culpa — el toolkit no lo
+> requiere.
+>
+> **Cuándo te conviene mantenerlo:**
+> - Vas a invitar a alguien (humano o agente) que no estuvo en la idea original.
+> - El alcance es más grande que un weekend project.
+> - Hay personas reales (clientes, stakeholders) cuyo problema querés resolver.
+>
+> **Cómo encaja con el resto:**
+> - `phs.yaml` → stack y decisiones técnicas (qué herramientas).
+> - `ROADMAP.md` → cuándo se construye qué (tiempo).
+> - `docs/features/<x>.md` → cómo se construye cada feature (detalle técnico).
+> - **`PRD.md` (este archivo)** → qué producto se está construyendo y para quién (conceptual).
+
+- **Última actualización:** {{TODAY}}
+- **Modo:** {{MODE}}
+- **Estado del PRD:** drafting / committed / shipped
+
+---
+
+## 1. App overview
+
+> Qué es el producto en 2-3 oraciones. Si no podés explicarlo así, el scope
+> todavía no está claro — terminá de pensarlo antes de codear.
+
+**Elevator pitch (1 línea):**
+
+_Una línea de qué hace y para quién._
+
+**Descripción (párrafo corto):**
+
+_Problema que resuelve, solución que propone, en qué se diferencia._
+
+---
+
+## 2. Personas
+
+> A quién le sirve. Concreto, no "todos". Una entrada por persona/rol.
+> Si tenés más de 3 personas, probablemente estás haciendo varios productos.
+
+### Persona A — _nombre / rol_
+
+- **Contexto:** _dónde y cuándo usa la app_
+- **Pain point principal:** _qué le duele hoy_
+- **Job to be done:** _qué quiere lograr (en sus palabras)_
+- **Cómo lo resuelve hoy:** _workaround actual o "no lo resuelve"_
+
+### Persona B — _opcional_
+
+(misma estructura)
+
+---
+
+## 3. Módulos
+
+> Agrupaciones funcionales de features. Pensá en módulos como capítulos
+> del producto. Si tu app es chica (1-3 features), saltate esto y listá
+> features directo en la sección 4.
+
+### `<modulo-1>` — _título funcional_
+
+- **Owner:** _tu / agente / colaborador_
+- **Status:** drafting / in-progress / shipped / parked
+- **Por qué existe:** _1 oración_
+- **Features:**
+  - `<feature-1>` → spec en `docs/features/<feature-1>.md`
+  - `<feature-2>` → spec en `docs/features/<feature-2>.md`
+
+### `<modulo-2>` — _opcional_
+
+(misma estructura)
+
+---
+
+## 4. Features (lista plana)
+
+> Listado completo, cruzando módulos. Si no usaste módulos, esta es la SSOT
+> de qué construye el producto.
+
+| Feature | Módulo | Persona principal | Status | Spec |
+|---|---|---|---|---|
+| _login_ | _auth_ | _Persona A_ | _drafting_ | `docs/features/login.md` |
+| _..._ | _..._ | _..._ | _..._ | _..._ |
+
+> Status: `drafting / committed / in-progress / shipped / cancelled`.
+
+---
+
+## 5. Métricas de éxito (KPIs)
+
+> Cómo sabés que el producto funciona. 2-3 KPIs concretos y medibles.
+> Si no podés definirlos, no es momento de codear todavía — falta claridad
+> de qué resultado buscás.
+
+- **KPI 1 — _nombre_:** _ej: 80% de usuarios completa el onboarding._
+- **KPI 2 — _nombre_:** _ej: tiempo de carga p95 < 3s._
+- **KPI 3 — _nombre_:** _ej: 0 incidentes de seguridad en 90 días._
+
+---
+
+## 6. Out of scope (explícito)
+
+> Qué NO va a hacer la app en este MVP. Documentar acá previene scope
+> creep y discusiones futuras del estilo "creí que esto iba".
+
+- _Cosa explícitamente fuera 1._
+- _Cosa explícitamente fuera 2._
+
+---
+
+## 7. Restricciones y supuestos
+
+**Restricciones (cosas que no negociamos):**
+- _ej: budget de $X/mes en infra._
+- _ej: deadline duro YYYY-MM-DD._
+- _ej: integración obligatoria con sistema X._
+
+**Supuestos (cosas que asumimos verdaderas hasta que se prueben falsas):**
+- _ej: usuarios tienen cuenta Google._
+- _ej: existe API pública del proveedor X._
+- _ej: el dominio funcional está estable los próximos 3 meses._
+
+---
+
+## 8. Riesgos de producto
+
+> No los técnicos (eso va en `RESUME.md` o ADRs). Acá: riesgos de que el
+> producto no resuelva el problema que dice resolver.
+
+- _Riesgo 1 — mitigación si la hay._
+- _Riesgo 2 — mitigación si la hay._
+
+---
+
+## Cuándo updatear este doc
+
+- **Antes de arrancar:** llenar 1, 2, 5, 6, 7. Módulos pueden ser TBD.
+- **Cuando emergen módulos del código:** llenar 3, 4.
+- **Al cerrar features:** marcar status en sección 4 + mover detalle a `implementation_logs/`.
+- **Cuando cambia el scope grande:** updatear este doc + ADR si aplica.
+
+---
+
+> Generado por smart-vibe. Es una **sugerencia** para vibe coders que
+> quieren alinear scope antes de codear. La SSOT temporal sigue siendo
+> `ROADMAP.md`; la SSOT técnica sigue siendo `phs.yaml`. Este doc es la
+> SSOT **conceptual** del producto — el "qué" y el "para quién".
