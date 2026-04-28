@@ -11,6 +11,34 @@
 
 ---
 
+## Antes de empezar (cwd esperado)
+
+El bootstrap **crea un subdirectorio nuevo** dentro de tu directorio
+actual. Por eso, cuando lanzás Claude Code (o corrés `bash`), el cwd debe
+ser el **parent** donde querés que viva el proyecto, **no** la carpeta del
+proyecto.
+
+```bash
+# ✓ Correcto: cwd es un workspace que contendrá el proyecto.
+cd ~/projects
+claude    # adentro corrés el prompt → smart-vibe crea ~/projects/mi-app/
+
+# ✗ Incorrecto: si vos creás la carpeta y entrás, bootstrap falla.
+mkdir mi-app && cd mi-app && claude   # → "El directorio ya existe"
+```
+
+| Escenario | cwd recomendado | Resultado |
+|---|---|---|
+| **A** Standalone | Cualquier workspace (`~/projects/`, `~/code/`, etc.) | Crea `<cwd>/<name>/` con el proyecto. |
+| **B** Workshop organizer | Cualquier workspace | Crea `<cwd>/<name>/` con el monorepo del workshop. |
+| **C** Workshop team-dev | Cualquier workspace donde quieras clonar | `git clone` crea `<cwd>/<workshop-repo>/`; después `cd` adentro y `join.sh`. |
+
+> **Tip:** mantené un workspace dedicado (ej. `~/projects/`) y lanzá Claude
+> Code siempre desde ahí. Cada `smart-vibe` aterriza en su propia subcarpeta
+> sin ensuciar el workspace.
+
+---
+
 ## Convención del prompt vibe
 
 El prompt al LLM **debe contener una URL** que sirva de cue inequívoco:
