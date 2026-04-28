@@ -166,11 +166,11 @@ if [[ "$TYPE" == "workshop" ]]; then
   fi
 
   # doctor.sh viaja embebido en el monorepo (referenciado por
-  # ORGANIZER-CHECKLIST y next-steps). Garantizar bit ejecutable
-  # por portabilidad (algunos cp -r no lo preservan).
-  if [[ -f "$TARGET_DIR/scripts/doctor.sh" ]]; then
-    chmod +x "$TARGET_DIR/scripts/doctor.sh"
-  fi
+  # ORGANIZER-CHECKLIST y next-steps). Single source: scripts/doctor.sh
+  # del toolkit; lo copiamos en runtime para evitar drift por
+  # duplicación del archivo en el repo.
+  cp "$REPO_ROOT/scripts/doctor.sh" "$TARGET_DIR/scripts/doctor.sh"
+  chmod +x "$TARGET_DIR/scripts/doctor.sh"
 
   # team-CLAUDE.md.tmpl tiene placeholders por team ({{TEAM_ID}}, etc.) que el
   # render genérico no conoce. Lo stasheamos fuera del proyecto y lo
