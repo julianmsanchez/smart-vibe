@@ -21,7 +21,7 @@ cd <repo>
 bash scripts/join.sh --as <team-id>
 ```
 
-Eso te deja con `.env.shared` creado, `pnpm install` corrido, y next-steps en pantalla.
+Eso te deja con `.env.shared` y `apps/<team-id>/.env.local` creados, `pnpm install` corrido, y next-steps en pantalla.
 
 > No necesitás la URL de smart-vibe — el `scripts/join.sh` ya viaja embebido en el clone del workshop.
 
@@ -30,11 +30,16 @@ Eso te deja con `.env.shared` creado, `pnpm install` corrido, y next-steps en pa
 ## Qué hace `scripts/join.sh`
 
 1. **Valida que tu `--as <team-id>` exista** en `workshop.yaml.workshop.teams[].id`. Si te equivocás, exit 2 con la lista de teams válidos.
-2. **Crea `.env.shared`** copiándolo de `.env.shared.example` (sin sobrescribir si ya existe).
+2. **Crea los dos `.env` del modelo two-layer:**
+   - `.env.shared` desde `.env.shared.example` (capa global).
+   - `apps/<team-id>/.env.local` desde `apps/<team-id>/.env.local.example` (capa team-specific).
+   - Ninguno se sobrescribe si ya existe.
 3. **Habilita corepack y corre `pnpm install`** desde la raíz del monorepo.
 4. **Imprime next-steps** con:
    - El comando `pnpm turbo dev --filter=shell --filter=apps/<team-id>`.
-   - La lista de variables que tenés que llenar en `.env.shared` (extraídas de `workshop.yaml.shared_infra`).
+   - **Dos secciones de vars** a llenar (extraídas de `workshop.yaml.shared_infra`):
+     - Globales (van en `.env.shared`).
+     - Team-specific de tu `<team-id>` (van en `apps/<team-id>/.env.local`).
    - Comandos del plugin Claude Code: `/smart-workshop status`, `/smart-workshop integration-check`.
 
 ---

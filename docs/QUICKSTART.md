@@ -86,13 +86,19 @@ Reemplazos:
 
 **Pasos manuales del organizer post-bootstrap:**
 
-1. Editar `workshop.yaml`: completar `shared_infra.apis_external[]` y `databases.url_env`.
-2. Editar `.env.shared.example` con las claves que cada dev debe llenar.
-3. Crear el repo y pushear:
-   ```bash
-   gh repo create org/<name> --public --source . --push
-   ```
-4. Compartir la URL en el chat del hackathon.
+Una vez generado el monorepo, abrí `ORGANIZER-CHECKLIST.md` en la raíz y
+completá los 4 pasos (~5–10 min). Cubre:
+
+1. `workshop.yaml` (`apis_external[]`, `storage[]`, `teams[].members`, `teams[].domain`).
+2. `.env.shared.example` (vars globales) + `apps/<team>/.env.local.example` (vars team-specific).
+3. `apps/<team>/CLAUDE.md` (dominio funcional + miembros).
+4. `gh repo create org/<name> --public --source . --push` (opcional).
+
+> El modelo env es **two-layer**: vars globales en `.env.shared.example`
+> (commiteado), vars team-specific en `apps/<team>/.env.local.example`
+> (commiteado). El campo `apis_external[].access` del `workshop.yaml`
+> decide qué archivo recibe cada var. Ver
+> [`docs/workshop/secrets-strategy.md`](../addons/workshop/docs/workshop/secrets-strategy.md.tmpl).
 
 ---
 
@@ -119,9 +125,10 @@ Reemplazos:
 - `<team-id>` → ID del team en el que el dev va a trabajar (debe existir en `workshop.yaml`).
 
 **Resultado:**
-- `.env.shared` creado (vacío de secretos — el dev pega los valores que el organizer compartió).
+- `.env.shared` creado (vars globales — el dev pega los valores que el organizer compartió).
+- `apps/<team-id>/.env.local` creado (vars team-specific — sólo las de su team).
 - `pnpm install` corrido en el monorepo.
-- Mensaje con next-steps: comando dev, vars requeridas, comandos del plugin.
+- Mensaje con next-steps: comando dev, **dos secciones** de vars (globales + team-specific), comandos del plugin.
 
 > **Por qué no usa la URL de smart-vibe:** el `scripts/join.sh` viaja embebido
 > en el clone del workshop, copiado por el bootstrap del organizer. Esto
@@ -180,7 +187,9 @@ Detalle completo en
    ejecutable presente.
 
 4. **Workshop team-dev:** clone de un workshop bootstrapeado + comando del
-   Escenario C → `.env.shared` creado, `pnpm install` ok, next-steps correctos.
+   Escenario C → `.env.shared` y `apps/<team-id>/.env.local` creados,
+   `pnpm install` ok, next-steps con dos secciones de vars (globales +
+   team-specific).
 
 5. **Team-id inválido:** `bash scripts/join.sh --as nonexistent` → exit 2 con
    error claro listando los teams válidos.
