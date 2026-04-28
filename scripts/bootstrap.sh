@@ -165,6 +165,13 @@ if [[ "$TYPE" == "workshop" ]]; then
     chmod +x "$TARGET_DIR/scripts/join.sh"
   fi
 
+  # doctor.sh viaja embebido en el monorepo (referenciado por
+  # ORGANIZER-CHECKLIST y next-steps). Garantizar bit ejecutable
+  # por portabilidad (algunos cp -r no lo preservan).
+  if [[ -f "$TARGET_DIR/scripts/doctor.sh" ]]; then
+    chmod +x "$TARGET_DIR/scripts/doctor.sh"
+  fi
+
   # team-CLAUDE.md.tmpl tiene placeholders por team ({{TEAM_ID}}, etc.) que el
   # render genérico no conoce. Lo stasheamos fuera del proyecto y lo
   # renderizamos al final, una vez que apps/<team>/ exista.
