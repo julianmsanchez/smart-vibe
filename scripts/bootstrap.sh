@@ -23,6 +23,14 @@ ADDON=""
 TEAMS=""
 SHELL_OWNER=""
 
+# Requirements wizard (single-team). Capturan intención del producto y
+# pre-pueblan wiki/PRD.md. Cada uno es opcional: vacío → "_TODO_" en PRD.
+TAGLINE=""
+TARGET_USER=""
+MODULES=""
+KPI=""
+MINIMAL=0
+
 # --- parse args ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -34,6 +42,11 @@ while [[ $# -gt 0 ]]; do
     --addon) ADDON="$2"; shift 2 ;;
     --teams) TEAMS="$2"; shift 2 ;;
     --shell-owner) SHELL_OWNER="$2"; shift 2 ;;
+    --tagline) TAGLINE="$2"; shift 2 ;;
+    --target-user) TARGET_USER="$2"; shift 2 ;;
+    --modules) MODULES="$2"; shift 2 ;;
+    --kpi) KPI="$2"; shift 2 ;;
+    --minimal) MINIMAL=1; shift ;;
     -h|--help)
       sed -n '2,11p' "$0"
       exit 0
@@ -82,6 +95,22 @@ case "$PM" in
   *) echo "✗ PM debe ser pnpm/npm/yarn." >&2; exit 1 ;;
 esac
 
+# --- requirements wizard (sólo single-team) ---
+# Captura intención del producto en 4 preguntas y pre-puebla wiki/PRD.md.
+# Cada respuesta es opcional: Enter vacío → "_TODO_" en el PRD.
+# --minimal salta el bloque entero (útil para CI / curl-pipe-bash sin TTY).
+if [[ "$TYPE" == "single-team" && "$MINIMAL" != "1" ]]; then
+  echo ""
+  echo "→ Requirements wizard (4 preguntas, Enter para saltar cada una)"
+  echo "  Pre-puebla wiki/PRD.md. Saltable con --minimal."
+  echo ""
+  prompt TAGLINE "1) Tagline (1 línea: qué hace tu app y para quién)" ""
+  prompt TARGET_USER "2) Usuario objetivo (rol o persona principal)" ""
+  prompt MODULES "3) Módulos esperados (CSV, ej: agenda,clinica,emails)" ""
+  prompt KPI "4) KPI principal (métrica que define éxito)" ""
+  echo ""
+fi
+
 # --- target dir ---
 if [[ -z "$TARGET_DIR" ]]; then
   TARGET_DIR="$(pwd)/$NAME"
@@ -95,6 +124,9 @@ fi
 mkdir -p "$TARGET_DIR"
 
 # --- helper: render template ---
+# Sustituye placeholders. Wizard fields (TAGLINE/TARGET_USER/MODULES/KPI):
+# si quedaron vacíos, se rinden como "_TODO_" para que el vibe coder vea
+# que falta llenar.
 render_tmpl() {
   local src="$1" dst="$2"
   sed \
@@ -104,6 +136,10 @@ render_tmpl() {
     -e "s|{{VERTICAL}}|$VERTICAL|g" \
     -e "s|{{PACKAGE_MANAGER}}|$PM|g" \
     -e "s|{{SHELL_OWNER}}|${SHELL_OWNER:-@TODO-shell-owner}|g" \
+    -e "s|{{TAGLINE}}|${TAGLINE:-_TODO_}|g" \
+    -e "s|{{TARGET_USER}}|${TARGET_USER:-_TODO_}|g" \
+    -e "s|{{MODULES}}|${MODULES:-_TODO_}|g" \
+    -e "s|{{KPI}}|${KPI:-_TODO_}|g" \
     "$src" > "$dst"
 }
 
@@ -120,29 +156,35 @@ render_tmpl "$REPO_ROOT/core/claude/settings.json.tmpl" "$TARGET_DIR/.claude/set
 
 # --- PHS skeleton ---
 echo "→ Generando phs.yaml..."
-cat > "$TARGET_DIR/phs.yaml" <<EOF
-# Prototype Handoff Spec — $NAME
-# Spec: $REPO_ROOT/core/phs/schema.yaml
-schema_version: "1.0"
-
-project:
-  name: $NAME
-  mode: vibe
-  type: $TYPE
-  vertical: $VERTICAL
-  tier: 1
-  created_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
-stack: ~        # completar: runtime, framework, db
-data: ~
-infra: ~
-auth: ~
-compliance: ~
-addons: []
-decisions: []
-sla: ~
-docs: ~
-EOF
+{
+  echo "# Prototype Handoff Spec — $NAME"
+  echo "# Spec: $REPO_ROOT/core/phs/schema.yaml"
+  echo "schema_version: \"1.0\""
+  echo ""
+  echo "project:"
+  echo "  name: $NAME"
+  echo "  mode: vibe"
+  echo "  type: $TYPE"
+  echo "  vertical: $VERTICAL"
+  echo "  tier: 1"
+  echo "  created_at: \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
+  if [[ -n "$TAGLINE" ]]; then
+    # description: opcional en el schema. La capturamos del wizard.
+    # Escapar comillas dobles para que el YAML quede válido.
+    desc_escaped="${TAGLINE//\"/\\\"}"
+    echo "  description: \"$desc_escaped\""
+  fi
+  echo ""
+  echo "stack: ~        # completar: runtime, framework, db"
+  echo "data: ~"
+  echo "infra: ~"
+  echo "auth: ~"
+  echo "compliance: ~"
+  echo "addons: []"
+  echo "decisions: []"
+  echo "sla: ~"
+  echo "docs: ~"
+} > "$TARGET_DIR/phs.yaml"
 
 # --- workshop ---
 if [[ "$TYPE" == "workshop" ]]; then
