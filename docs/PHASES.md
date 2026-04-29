@@ -1,14 +1,14 @@
 # Fases del proyecto smart-vibe
 
 > Fuente: destilado de `~/.claude/plans/hazy-sniffing-hearth.md` (plan maestro v2) + estado real verificado contra el repo.
-> Última actualización: 2026-04-28.
+> Última actualización: 2026-04-29.
 
 ## Resumen ejecutivo
 
 | Fase | Objetivo | Estado | Tag |
 |---|---|---|---|
-| 1 | MVP OSS — modo `vibe` listo en <30 min | ✅ completa, en iteración | v0.1.5 |
-| 2 | Agentes nuevos + hooks + slash commands de workflow | 🟡 no empezada | v0.2.0 (target) |
+| 1 | MVP OSS — modo `vibe` listo en <30 min | ✅ completa | v0.1.5 |
+| 2 | Agentes nuevos + hooks + slash commands de workflow | ✅ completa | v0.2.0 |
 | 3 | Multi-stack + EN + marketplace | 🔴 lejano | v1.x |
 
 ---
@@ -49,29 +49,35 @@
 
 ---
 
-## Fase 2 — post-MVP (🟡 NO empezada)
+## Fase 2 — post-MVP (✅ completa, v0.2.0)
 
-**3 entregables explícitos** (`hazy-sniffing-hearth.md:242-245`):
+**3 entregables explícitos** (`hazy-sniffing-hearth.md:242-245`), todos entregados:
 
-### 2.1 Agentes nuevos en `plugin/agents/`
+### 2.1 Agentes nuevos en `plugin/agents/` ✅
 
-- `reviewer.md` — code review con perspectiva de las 7 policies.
-- `explorer.md` — recorre código y devuelve mapa mental para session de discovery.
+- ✅ `reviewer.md` — code review light dev-time con perspectiva de las 7 policies (3 severidades: block/warn/info, output corto, sin scoring 0-5).
+- ✅ `explorer.md` — discovery agent: recorre código y devuelve mapa mental (estructura, entry points, hotspots, deuda visible).
 
-(Hoy hay 3: architect, doc-writer, phs-helper.)
+(Total: 5 agentes — architect, doc-writer, phs-helper, reviewer, explorer.)
 
-### 2.2 Hook `session-start.sh`
+### 2.2 Hook `session-start.sh` ✅
 
-- Hook tipo `SessionStart` que auto-carga `wiki/RESUME.md` al inicio de cada sesión Claude Code.
-- Reduce fricción: arrancás sesión nueva y ya tenés contexto del proyecto cargado.
+- ✅ `scripts/session-start.sh` lee `wiki/RESUME.md` (con fallback a `RESUME.md` raíz), trunca a 12KB y emite JSON con `hookSpecificOutput.additionalContext`.
+- ✅ Registrado en `core/claude/settings.json.tmpl` bajo `hooks.SessionStart`.
+- ✅ Embed automático en proyectos generados por bootstrap (single-team y workshop).
+- ✅ Disable: `SMART_VIBE_DISABLE_SESSION_HOOK=1`.
 
-### 2.3 Slash commands de workflow
+### 2.3 Slash commands de workflow ✅
 
-- `/smart-close-feature` — workflow de cierre (commit, session_summary, update RESUME, update ROADMAP).
-- `/smart-preflight` — validación pre-deploy (lint, test, doctor, policies check).
-- `/smart-implementation-log` — generar entry en `wiki/docs/implementation_logs/` desde el contexto de la sesión.
+- ✅ `/smart-close-feature` — workflow de cierre (commit, session_summary, update RESUME, update ROADMAP). Simétrico a `/smart-feature`.
+- ✅ `/smart-preflight` — validación pre-deploy (working tree + lint + typecheck + test + doctor + phs/workshop validate, `--review` opcional invocando al agente reviewer).
+- ✅ `/smart-implementation-log` — entry técnico en `wiki/docs/implementation_logs/` desde el contexto de la sesión.
 
-**Tag esperado al cerrar Fase 2:** v0.2.0.
+(Total: 10 commands — los 7 de v0.1.0 + estos 3.)
+
+### Bonus de v0.2.0 (no era entregable de Fase 2 pero shipped)
+
+- ✅ `scripts/check-docs.sh` + `scripts/install-hooks.sh` + `.github/workflows/check-docs.yml` — enforcer de la "Regla de documentación viva". Cierra el riesgo de drift (CHANGELOG/PHASES sin actualizar tras tag).
 
 ---
 

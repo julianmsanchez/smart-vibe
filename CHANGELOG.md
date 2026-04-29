@@ -7,16 +7,28 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
-### Added — Fase 2 (in progress, target v0.2.0)
+_Sin cambios desde v0.2.0._
+
+---
+
+## [0.2.0] — 2026-04-29
+
+Cierre de **Fase 2** (post-MVP). Tres entregables: 2 agentes nuevos, hook
+`SessionStart` que auto-carga contexto, y 3 slash commands de workflow.
+
+### Added — Agentes nuevos (entregable 2.1)
 - `feat(plugin)` — agente `reviewer` (`plugin/agents/reviewer.md`). Code review light dev-time desde la perspectiva de las 7 policies. 3 severidades (`block`/`warn`/`info`), output corto en chat, sin scoring formal. Para audit profundo con scoring 0-5 → `/smart-audit` en celeru-pro.
 - `feat(plugin)` — agente `explorer` (`plugin/agents/explorer.md`). Discovery agent: recorre código existente y entrega un mapa mental (estructura, entry points, hotspots, deuda visible) para arrancar a entender un repo en <10 min. Complementa `/smart-summary` (estado) y `/smart-teleport` (memoria propia).
-- `feat(scripts)` — `scripts/session-start.sh` + registro en `core/claude/settings.json.tmpl`. Hook `SessionStart` que auto-carga `wiki/RESUME.md` (con fallback a `RESUME.md` raíz) e inyecta el contenido al modelo vía `hookSpecificOutput.additionalContext`. Truncado a 12KB. Embed automático en proyectos generados por bootstrap (single-team y workshop). Disable: `SMART_VIBE_DISABLE_SESSION_HOOK=1`.
-- `feat(plugin)` — 3 slash commands de workflow:
-  - `/smart-close-feature` — workflow de cierre (commit + session_summary + update RESUME + update ROADMAP). Simétrico a `/smart-feature`.
-  - `/smart-preflight` — validación pre-deploy (working tree + lint + typecheck + test + doctor + phs/workshop validate, con `--review` opcional invocando al agente reviewer). Falla rápido. La versión audit profunda con scoring 0-5 vive en celeru-pro como `/smart-audit`.
-  - `/smart-implementation-log` — genera entry técnico en `wiki/docs/implementation_logs/` desde el contexto de la sesión. Complementa session_summaries con profundidad técnica (problema/opciones/decisión/trade-offs/riesgos).
 
-### Added
+### Added — Hook SessionStart (entregable 2.2)
+- `feat(scripts)` — `scripts/session-start.sh` + registro en `core/claude/settings.json.tmpl`. Hook `SessionStart` que auto-carga `wiki/RESUME.md` (con fallback a `RESUME.md` raíz) e inyecta el contenido al modelo vía `hookSpecificOutput.additionalContext`. Truncado a 12KB. Embed automático en proyectos generados por bootstrap (single-team y workshop). Disable: `SMART_VIBE_DISABLE_SESSION_HOOK=1`.
+
+### Added — Slash commands de workflow (entregable 2.3)
+- `feat(plugin)` — `/smart-close-feature` — workflow de cierre (commit + session_summary + update RESUME + update ROADMAP). Simétrico a `/smart-feature`.
+- `feat(plugin)` — `/smart-preflight` — validación pre-deploy (working tree + lint + typecheck + test + doctor + phs/workshop validate, con `--review` opcional invocando al agente reviewer). Falla rápido. La versión audit profunda con scoring 0-5 vive en celeru-pro como `/smart-audit`.
+- `feat(plugin)` — `/smart-implementation-log` — genera entry técnico en `wiki/docs/implementation_logs/` desde el contexto de la sesión. Complementa session_summaries con profundidad técnica (problema/opciones/decisión/trade-offs/riesgos).
+
+### Added — Tooling
 - `chore(scripts)` — `scripts/check-docs.sh` + `scripts/install-hooks.sh` + `.github/workflows/check-docs.yml`. Enforcer de la "Regla de documentación viva": commits `feat`/`fix` que tocan paths user-facing (`scripts/`, `addons/`, `plugin/`, `core/{phs,workshop-spec,policies,templates}/`, `docs/framework/`) deben actualizar `CHANGELOG.md` en el mismo commit. Local vía `commit-msg` hook (opt-in con `bash scripts/install-hooks.sh`); CI vía workflow en PRs. Escape hatch: `SKIP_DOCS_CHECK=1`.
 
 ---
@@ -151,7 +163,8 @@ Primera release pública. MVP del **Smart Vibe Framework** — distribución OSS
 
 ---
 
-[Unreleased]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/julianmsanchez/smart-vibe/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.5...v0.2.0
 [0.1.5]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.2...v0.1.4
 [0.1.2]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.0...v0.1.2
