@@ -84,8 +84,14 @@ Salida esperada: vacía. Si aparece algo, sanitizar antes de commit. Aplica espe
 
 ## Planes operativos vigentes (locales, fuera del repo)
 
-- `~/.claude/plans/` — plan operativo principal y diseños aprobados (workshop addon, etc.). Bloques A–J, decisiones cerradas, riesgos.
-- `~/.openclaw/workspace/smart-vibe-docs/` — plan v2 completo (fuente de verdad metodológica) y referencias de hermano privado.
+**Léelos al arrancar cualquier sesión nueva en este repo.** Son la constitución temporal del proyecto y explican qué se hizo, qué falta y por qué.
+
+- `~/.claude/plans/hazy-sniffing-hearth.md` — **plan maestro v2** (Bloques A–J, Definition of Done con 20 checks, Fase 1/2/3, riesgos). Fuente principal del scaffolding actual.
+- `~/.claude/plans/parsed-chasing-boole.md` — **plan v0.1.2** del workshop addon (organizer guidance + two-layer env model). Aplica a Bloques D y F del plan maestro.
+- `~/.openclaw/workspace/smart-vibe-docs/SMART_VIBE_PLAN_V2.md` — plan completo v2 (fuente de verdad metodológica).
+- `~/.openclaw/workspace/smart-vibe-docs/CELERU_PRO_PLAN.md` — referencia del hermano privado `celeru-pro` (NO se scaffoldea desde acá; vive en repo separado bajo `~/.openclaw/workspace/celeru-pro/`).
+
+Resumen de fases activas y entregadas: ver `docs/PHASES.md` en este repo.
 
 Si vas a hacer un cambio estructural (nuevo bloque, nuevo schema, nueva decisión), actualizá primero el plan operativo y luego el código.
 
