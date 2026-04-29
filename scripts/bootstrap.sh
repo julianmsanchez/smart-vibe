@@ -379,6 +379,11 @@ if [[ "$TYPE" == "workshop" ]]; then
     done
     rm -f "$TEAM_CLAUDE_STASH"
   fi
+
+  # Sincronizar .env.shared.example + apps/<team>/.env.local.example con el
+  # workshop.yaml recién generado. Sin esto, sync-env.sh --check reporta
+  # drift en el primer commit (template embebido vs marcadores per-team).
+  ( cd "$TARGET_DIR" && bash scripts/sync-env.sh >/dev/null )
 fi
 
 # --- single-team con node-ts ---
