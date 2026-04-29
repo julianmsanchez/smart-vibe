@@ -404,6 +404,40 @@ if [[ "$TYPE" == "single-team" ]]; then
   done < <(find "$TARGET_DIR" -name '*.tmpl' -print0)
 fi
 
+# --- post-render: pre-poblar PRD.md sección 3 con módulos del wizard ---
+# El placeholder {{MODULES_AUTOGEN}} (línea sola) en PRD.md.tmpl se reemplaza
+# acá con un esqueleto de módulo por cada item del CSV $MODULES. Si MODULES
+# está vacío, el marcador se borra silencioso. Pure bash+sed (sin python).
+if [[ -f "$TARGET_DIR/wiki/PRD.md" ]]; then
+  if [[ -n "$MODULES" ]]; then
+    autogen_tmp=$(mktemp)
+    {
+      echo ""
+      echo "> _Esqueleto auto-generado desde el wizard. Editá libremente._"
+      IFS=',' read -ra MOD_ARR <<< "$MODULES"
+      for m in "${MOD_ARR[@]}"; do
+        m_trim=$(echo "$m" | xargs)
+        [[ -z "$m_trim" ]] && continue
+        echo ""
+        echo "### \`$m_trim\` — _título funcional_"
+        echo ""
+        echo "- **Owner:** _tu / agente / colaborador_"
+        echo "- **Status:** drafting"
+        echo "- **Por qué existe:** _1 oración_"
+        echo "- **Features:** _docs/features/<feature>.md_"
+      done
+    } > "$autogen_tmp"
+    # sed `r` insert + `d` borra la línea marcador. -i.bak para BSD/GNU.
+    sed -i.bak -e "/{{MODULES_AUTOGEN}}/r $autogen_tmp" -e "/{{MODULES_AUTOGEN}}/d" "$TARGET_DIR/wiki/PRD.md"
+    rm -f "$TARGET_DIR/wiki/PRD.md.bak" "$autogen_tmp"
+  else
+    # Sin módulos del wizard: dejar sección 3 con ejemplos genéricos.
+    # Sustituir marcador por línea vacía para preservar el espaciado.
+    sed -i.bak "s|{{MODULES_AUTOGEN}}||" "$TARGET_DIR/wiki/PRD.md"
+    rm -f "$TARGET_DIR/wiki/PRD.md.bak"
+  fi
+fi
+
 # --- README minimal del proyecto ---
 # Si el addon ya generó un README.md (caso workshop con README.md.tmpl), no
 # lo sobrescribimos. El heredoc sólo aplica a single-team y a casos sin
@@ -472,4 +506,11 @@ else
   echo "  $PM dev"
 fi
 echo ""
-echo "Cuando tengas el primer feature, completá phs.yaml.decisions[]."
+echo "Mientras vibeás:"
+echo "  - Cada decisión técnica → ADR en docs/decisions/ (ver _template.md) +"
+echo "    entry en phs.yaml.decisions[]."
+echo "  - Sesiones largas → wiki/docs/session_summaries/ (ver _template.md)."
+echo "  - bash scripts/doctor.sh para chequear estado."
+echo ""
+echo "Cuando el proyecto madure y quieras pasar a producción:"
+echo "  /smart-graduate    # checklist + handoff a celeru-pro (modo graduating)"
