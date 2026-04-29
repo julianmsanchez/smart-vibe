@@ -7,6 +7,10 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase 2 (in progress, target v0.2.0)
+- `feat(plugin)` — agente `reviewer` (`plugin/agents/reviewer.md`). Code review light dev-time desde la perspectiva de las 7 policies. 3 severidades (`block`/`warn`/`info`), output corto en chat, sin scoring formal. Para audit profundo con scoring 0-5 → `/smart-audit` en celeru-pro.
+- `feat(plugin)` — agente `explorer` (`plugin/agents/explorer.md`). Discovery agent: recorre código existente y entrega un mapa mental (estructura, entry points, hotspots, deuda visible) para arrancar a entender un repo en <10 min. Complementa `/smart-summary` (estado) y `/smart-teleport` (memoria propia).
+
 ### Added
 - `chore(scripts)` — `scripts/check-docs.sh` + `scripts/install-hooks.sh` + `.github/workflows/check-docs.yml`. Enforcer de la "Regla de documentación viva": commits `feat`/`fix` que tocan paths user-facing (`scripts/`, `addons/`, `plugin/`, `core/{phs,workshop-spec,policies,templates}/`, `docs/framework/`) deben actualizar `CHANGELOG.md` en el mismo commit. Local vía `commit-msg` hook (opt-in con `bash scripts/install-hooks.sh`); CI vía workflow en PRs. Escape hatch: `SKIP_DOCS_CHECK=1`.
 
