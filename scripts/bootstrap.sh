@@ -271,6 +271,8 @@ if [[ "$TYPE" == "workshop" ]]; then
   chmod +x "$TARGET_DIR/scripts/sync-env.sh"
   cp "$REPO_ROOT/scripts/graduate.sh" "$TARGET_DIR/scripts/graduate.sh"
   chmod +x "$TARGET_DIR/scripts/graduate.sh"
+  cp "$REPO_ROOT/scripts/session-start.sh" "$TARGET_DIR/scripts/session-start.sh"
+  chmod +x "$TARGET_DIR/scripts/session-start.sh"
 
   # team-CLAUDE.md.tmpl tiene placeholders por team ({{TEAM_ID}}, etc.) que el
   # render genérico no conoce. Lo stasheamos fuera del proyecto y lo
@@ -404,6 +406,8 @@ if [[ "$TYPE" == "single-team" ]]; then
   chmod +x "$TARGET_DIR/scripts/doctor.sh"
   cp "$REPO_ROOT/scripts/graduate.sh" "$TARGET_DIR/scripts/graduate.sh"
   chmod +x "$TARGET_DIR/scripts/graduate.sh"
+  cp "$REPO_ROOT/scripts/session-start.sh" "$TARGET_DIR/scripts/session-start.sh"
+  chmod +x "$TARGET_DIR/scripts/session-start.sh"
 
   # Renderizar .tmpl
   while IFS= read -r -d '' tmpl; do

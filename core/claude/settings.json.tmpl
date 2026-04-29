@@ -74,5 +74,17 @@
     "SMART_VIBE_PROJECT": "{{PROJECT_NAME}}"
   },
 
-  "_hooks_comment": "En modo vibe los hooks vienen vacíos por defecto. En graduating se agregan PreToolUse para validar phs.yaml antes de commits y PostToolUse para correr tests post-edit. Ver core/policies/07-change-control en celeru-pro."
+  "hooks": {
+    "_comment": "SessionStart auto-carga wiki/RESUME.md para arrancar la sesión con contexto. Disable con SMART_VIBE_DISABLE_SESSION_HOOK=1. En graduating se agregan PreToolUse/PostToolUse — ver core/policies/07-change-control en celeru-pro.",
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
