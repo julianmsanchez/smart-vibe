@@ -114,7 +114,7 @@ cmd_general() {
   if [[ -f README.md && -s README.md ]]; then
     ok "README.md presente"
   else
-    warn "README.md ausente o vacío. Ver core/playbooks/04-no-readme.md"
+    warn "README.md ausente o vacío. Ver docs/playbooks/04-no-readme.md"
   fi
 
   # 4. .env.example (o .env.shared.example en workshop)
@@ -138,13 +138,13 @@ cmd_general() {
       fi
     fi
   else
-    warn ".env.example ausente. Ver core/playbooks/05-no-env-example.md"
+    warn ".env.example ausente. Ver docs/playbooks/05-no-env-example.md"
   fi
 
   # 5. .env NO commiteado
   if [[ -f .env ]]; then
     if git ls-files --error-unmatch .env 2>/dev/null >/dev/null; then
-      fail ".env está commiteado al repo. Ver core/playbooks/01-hardcoded-secrets.md"
+      fail ".env está commiteado al repo. Ver docs/playbooks/01-hardcoded-secrets.md"
     else
       ok ".env presente y gitignored"
     fi
@@ -156,7 +156,7 @@ cmd_general() {
   if [[ "$test_count" -gt 0 ]]; then
     ok "$test_count test file(s) detectado(s)"
   else
-    warn "Sin tests automatizados. Ver core/playbooks/03-no-tests.md"
+    warn "Sin tests automatizados. Ver docs/playbooks/03-no-tests.md"
   fi
 
   # 7. CLAUDE.md
