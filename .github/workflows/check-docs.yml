@@ -1,0 +1,16 @@
+name: check-docs
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verificar CHANGELOG en cambios user-facing
+        run: bash scripts/check-docs.sh --pr "origin/${{ github.base_ref }}"

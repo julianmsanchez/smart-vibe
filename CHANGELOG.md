@@ -7,7 +7,8 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
-_Sin cambios desde v0.1.5._
+### Added
+- `chore(scripts)` — `scripts/check-docs.sh` + `scripts/install-hooks.sh` + `.github/workflows/check-docs.yml`. Enforcer de la "Regla de documentación viva": commits `feat`/`fix` que tocan paths user-facing (`scripts/`, `addons/`, `plugin/`, `core/{phs,workshop-spec,policies,templates}/`, `docs/framework/`) deben actualizar `CHANGELOG.md` en el mismo commit. Local vía `commit-msg` hook (opt-in con `bash scripts/install-hooks.sh`); CI vía workflow en PRs. Escape hatch: `SKIP_DOCS_CHECK=1`.
 
 ---
 

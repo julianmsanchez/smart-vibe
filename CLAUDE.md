@@ -87,6 +87,14 @@ Toda PR/commit que cambie comportamiento o estructura debe actualizar la documen
 
 **Si encontrás un drift** (doc que ya no refleja el código), tratalo como bug y arreglarlo en el siguiente commit, no diferir.
 
+**Enforcement automático (opt-in):**
+
+```bash
+bash scripts/install-hooks.sh   # una vez por clone
+```
+
+Instala un `commit-msg` hook que falla si un commit `feat`/`fix` toca paths user-facing (`scripts/`, `addons/`, `plugin/`, `core/{phs,workshop-spec,policies,templates}/`, `docs/framework/`) sin actualizar `CHANGELOG.md`. El mismo chequeo corre en CI vía `.github/workflows/check-docs.yml` sobre cada PR a `main`. Para saltar puntualmente: `SKIP_DOCS_CHECK=1 git commit ...`.
+
 > Nota cross-repo: en `celeru-pro` aplica la misma regla con su propio `CHANGELOG.md` + `ROADMAP.md` + `docs/decisions/`.
 
 ## Regla de saneamiento (obligatoria antes de commit en archivos extraídos)
