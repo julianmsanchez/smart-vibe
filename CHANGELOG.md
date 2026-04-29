@@ -7,9 +7,20 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+_Sin cambios desde v0.1.5._
+
+---
+
+## [0.1.5] — 2026-04-28
+
 ### Added
 - `feat(graduate)` — `/smart-graduate` redesign como diagnóstico read-only con 3 categorías (crítico / recomendado / inventario). Sin umbrales arbitrarios; reporta hechos. Genera `docs/graduate-handoff.md` para consumir en celeru-pro.
 - `scripts/graduate.sh` — companion bash script con 7 critical checks + 7 recommended + 9 inventory metrics. Embebido en bootstrap (single-team + workshop).
+- `CHANGELOG.md` raíz (Keep a Changelog en español).
+- `docs/PHASES.md` — resumen de Fase 1 (entregada) / Fase 2 (pendiente) / Fase 3 (lejano) + scope out-of-scope (celeru-pro).
+
+### Changed
+- `CLAUDE.md` raíz: sección "Planes operativos" ahora referencia explícitamente `~/.claude/plans/hazy-sniffing-hearth.md` y `parsed-chasing-boole.md`, y apunta a `docs/PHASES.md` como referencia rápida.
 
 ### Fixed
 - `fix(scripts)` — bootstrap corre `sync-env.sh` post-workshop para evitar drift entre `.env.shared.example` y `workshop.yaml` en el primer commit.
@@ -130,7 +141,8 @@ Primera release pública. MVP del **Smart Vibe Framework** — distribución OSS
 
 ---
 
-[Unreleased]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.2...v0.1.4
 [0.1.2]: https://github.com/julianmsanchez/smart-vibe/compare/v0.1.0...v0.1.2
 [0.1.0]: https://github.com/julianmsanchez/smart-vibe/releases/tag/v0.1.0

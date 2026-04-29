@@ -7,13 +7,13 @@
 
 | Fase | Objetivo | Estado | Tag |
 |---|---|---|---|
-| 1 | MVP OSS — modo `vibe` listo en <30 min | ✅ completa, en iteración | v0.1.4 (próx. v0.1.5) |
+| 1 | MVP OSS — modo `vibe` listo en <30 min | ✅ completa, en iteración | v0.1.5 |
 | 2 | Agentes nuevos + hooks + slash commands de workflow | 🟡 no empezada | v0.2.0 (target) |
 | 3 | Multi-stack + EN + marketplace | 🔴 lejano | v1.x |
 
 ---
 
-## Fase 1 — MVP v0.1.0 (✅ completa, superada hasta v0.1.4)
+## Fase 1 — MVP v0.1.0 (✅ completa, superada hasta v0.1.5)
 
 **Objetivo:** builder externo corre `bash scripts/bootstrap.sh` y obtiene proyecto en modo `vibe` listo en <30 min.
 
@@ -38,7 +38,7 @@
 - **v0.1.2** — organizer guidance (`ORGANIZER-CHECKLIST.md`) + two-layer env model. Plan en `parsed-chasing-boole.md`.
 - **v0.1.3** — wiki-skeleton + `PRD.md` template para vibers (parte de v0.1.4 final).
 - **v0.1.4** — `scripts/sync-env.sh` auto-sync `apis_external[].access` → archivos env (cierra TODO de v0.1.2).
-- **v0.1.5 (próx.)** — `/smart-graduate` redesign (read-only diagnostic, 3 categorías) + `scripts/graduate.sh` + bootstrap corre `sync-env` post-workshop.
+- **v0.1.5** — `/smart-graduate` redesign (read-only diagnostic, 3 categorías) + `scripts/graduate.sh` + bootstrap corre `sync-env` post-workshop + `CHANGELOG.md` raíz + `docs/PHASES.md` + `CLAUDE.md` con refs a planes.
 
 ### Gaps menores conocidos (del plan maestro)
 

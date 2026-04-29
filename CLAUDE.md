@@ -61,6 +61,34 @@ smart-vibe/
 - **NO `--no-verify`.** Si un pre-commit falla, investigar.
 - **Branch por defecto:** `main`. Sin trabajos en otras ramas hasta que el usuario lo pida.
 
+## Regla de documentación viva (obligatoria)
+
+Toda PR/commit que cambie comportamiento o estructura debe actualizar la documentación correspondiente **en el mismo commit**. Sin excepciones.
+
+**Matriz de qué actualizar según el cambio:**
+
+| Tipo de cambio | Qué actualizar (en el mismo commit) |
+|---|---|
+| `feat` / `fix` con impacto user-facing | `CHANGELOG.md` (sección `[Unreleased]`) |
+| Cierre de release (tag nuevo) | `CHANGELOG.md` mover `[Unreleased]` → versión + fecha + actualizar links comparativos |
+| Cambio de fase / scope | `docs/PHASES.md` (estado, tag, próximos entregables) |
+| Decisión arquitectónica nueva | ADR nuevo en `docs/decisions/NNNN-<slug>.md` |
+| Cambio de schema (PHS, workshop.yaml) | `core/{phs,workshop-spec}/README.md` + `validation-rules.md` + ejemplos |
+| Cambio en bootstrap/doctor/sync-env/graduate | comentarios de header del script + `docs/QUICKSTART.md` si toca el flujo del builder |
+| Cambio de slash command | `plugin/commands/<command>.md` (la propia spec) + sección "Comandos útiles" si aplica |
+| Cambio de policy / golden rule | el archivo de la policy en `core/policies/` y el doc del framework correspondiente |
+| Cambio en addon (node-ts, workshop) | `addons/<addon>/README.md` o `ARCHITECTURE.md` |
+
+**Regla de aceptación antes de tag:** correr este checklist mental:
+1. ¿El changelog tiene una entrada por cada commit user-facing desde el último tag?
+2. ¿`docs/PHASES.md` refleja el estado real (no dice "próx." de algo ya entregado)?
+3. ¿Cada decisión tomada en este ciclo tiene su ADR registrado en `phs.yaml.decisions[]`?
+4. Si un README quedó desactualizado, fix antes de taggear.
+
+**Si encontrás un drift** (doc que ya no refleja el código), tratalo como bug y arreglarlo en el siguiente commit, no diferir.
+
+> Nota cross-repo: en `celeru-pro` aplica la misma regla con su propio `CHANGELOG.md` + `ROADMAP.md` + `docs/decisions/`.
+
 ## Regla de saneamiento (obligatoria antes de commit en archivos extraídos)
 
 Cuando se extraen archivos desde fuentes privadas upstream (logger, env-loader, manage-server, etc.) hay que sanearlos antes de commitear. La regla:
