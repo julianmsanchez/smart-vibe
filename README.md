@@ -4,7 +4,7 @@
 > Cuando estés listo para producción, [CeleruIA](https://celeru.co/celeruia) te lleva.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
-![Status: pre-release](https://img.shields.io/badge/status-pre--release-orange)
+[![Version](https://img.shields.io/badge/version-v0.2.0-blue)](CHANGELOG.md)
 
 ---
 
@@ -121,9 +121,40 @@ cd mi-proyecto && code .
 
 ---
 
+## Qué te queda en el proyecto generado
+
+Después del bootstrap, dentro de tu proyecto vas a tener tres tipos de
+herramientas. Detalle de uso, workflow día-a-día y FAQ → **[`docs/USER-GUIDE.md`](docs/USER-GUIDE.md)**.
+
+### Slash commands del plugin (10)
+
+| | |
+|---|---|
+| `/smart-bootstrap` | bootstrap interactivo |
+| `/smart-feature <nombre>` | abrir una feature (código + test + wiki) |
+| `/smart-close-feature <nombre>` | cerrar feature (commit + session_summary + RESUME + ROADMAP) |
+| `/smart-implementation-log <slug>` | nota técnica profunda de algo complejo |
+| `/smart-preflight` | validación pre-deploy (lint + test + doctor + phs) |
+| `/smart-summary` | overview del estado del proyecto |
+| `/smart-teleport` | cargar contexto en sesión nueva |
+| `/smart-phs` | editar/validar `phs.yaml` |
+| `/smart-workshop` | subcomandos del addon workshop |
+| `/smart-graduate` | diagnóstico read-only + handoff a celeru-pro |
+
+### Agentes (5)
+
+`architect` (decisiones), `reviewer` (code review light), `explorer` (discovery
+de repo), `doc-writer` (wiki/READMEs), `phs-helper` (edición asistida del PHS).
+
+### Scripts (4)
+
+`scripts/doctor.sh` (estado), `scripts/sync-env.sh` (workshop), `scripts/graduate.sh` (handoff diagnostic), `scripts/session-start.sh` (hook que auto-carga `wiki/RESUME.md`).
+
+---
+
 ## Status
 
-🚧 **Pre-release.** Estamos camino a `v0.1.0`. Algunas piezas listadas arriba todavía están en construcción; ver `CHANGELOG.md` cuando esté disponible.
+✅ **v0.2.0** — Fases 1 y 2 completas (MVP + agentes nuevos + hooks + slash commands de workflow). Detalle por versión en [`CHANGELOG.md`](CHANGELOG.md). Roadmap de fases en [`docs/PHASES.md`](docs/PHASES.md).
 
 ## Licencia
 

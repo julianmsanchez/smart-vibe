@@ -7,7 +7,11 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
-_Sin cambios desde v0.2.0._
+### Added
+- `docs(user-guide)` — `docs/USER-GUIDE.md` nuevo: manual de uso de las herramientas que `smart-vibe` instala en el proyecto del builder. Cubre workflow día-a-día, slash commands (10), agentes (5), scripts (4), decisiones de documentación (ADR vs implementation_log vs session_summary), variables de entorno y FAQ. Linkea a las specs por archivo en `plugin/commands/` y `plugin/agents/`.
+
+### Changed
+- `docs(readme)` — sección "Qué te queda en el proyecto generado" con listado de slash commands, agentes y scripts. Link directo a `docs/USER-GUIDE.md` para detalles. Status badge actualizado de "pre-release" a "v0.2.0" con link al `CHANGELOG.md` (cierra drift: el README decía "camino a v0.1.0" cuando ya estamos en v0.2.0).
 
 ---
 
