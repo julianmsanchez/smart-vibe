@@ -20,7 +20,7 @@ Crea el esqueleto de una feature: archivos de código, tests, doc en wiki, y reg
 3. Genera:
    - Archivo principal con un handler/componente stub.
    - Test stub con un `it.todo()`.
-   - Entry en `wiki/features/<nombre>.md` con secciones: Contexto, Decisiones, Estado, TODOs.
+   - Entry en `wiki/docs/features/<nombre>.md` con secciones: Contexto, Decisiones, Estado, TODOs.
 4. Si la feature implica un endpoint cross-team (workshop), sugiere agregar el schema en `@workshop/api-contracts`.
 5. Pregunta si querés agregar una entry a `phs.yaml.decisions[]`.
 

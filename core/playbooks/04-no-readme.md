@@ -59,7 +59,7 @@ scripts/    - utilidades (bootstrap, doctor)
 ### 2. Qué NO va en el README
 
 - Tutorial extenso → wiki.
-- Lista exhaustiva de features → wiki/features/.
+- Lista exhaustiva de features → wiki/docs/features/.
 - Decisiones de arquitectura → ARCHITECTURE.md o ADR.
 - Política de contribución → CONTRIBUTING.md.
 

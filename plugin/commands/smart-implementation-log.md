@@ -32,7 +32,7 @@ Crea `wiki/docs/implementation_logs/<YYYY-MM-DD>-<slug>.md` con el siguiente tem
 - **Fecha:** <YYYY-MM-DD>
 - **Autor:** <git config user.name>
 - **Commit(s):** <sha1>, <sha2>
-- **Feature(s) afectada(s):** <link a wiki/features/...>
+- **Feature(s) afectada(s):** <link a wiki/docs/features/...>
 - **Modo del proyecto:** vibe | graduating
 
 ## Contexto

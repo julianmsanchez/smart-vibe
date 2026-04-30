@@ -15,7 +15,7 @@ Es el complemento de `/smart-feature` (que la abre).
 
 - `<nombre>` — slug de la feature que se está cerrando. Si se omite,
   intenta deducir del branch actual o del último entry en
-  `wiki/features/`.
+  `wiki/docs/features/`.
 
 ## Qué hace
 
@@ -65,7 +65,7 @@ Es el complemento de `/smart-feature` (que la abre).
 ## Cuándo NO usar
 
 - Si los tests no pasan: arreglá primero, después cerrá.
-- Cambios cross-feature: no encajan en una sola entry de wiki/features/.
+- Cambios cross-feature: no encajan en una sola entry de wiki/docs/features/.
 - Si estás en mitad de un refactor grande: usá commits intermedios.
 
 ## Relación con otros comandos

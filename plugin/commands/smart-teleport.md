@@ -40,7 +40,7 @@ Workshop:
 - def456 fix: ...
 
 Wiki principales:
-- wiki/features/onboarding.md
+- wiki/docs/features/onboarding.md
 - wiki/architecture/api-contracts.md
 
 == READY ==

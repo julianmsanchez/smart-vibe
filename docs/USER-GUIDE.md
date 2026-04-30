@@ -27,7 +27,7 @@ Empezás sesión              → SessionStart hook carga wiki/RESUME.md automá
                               (no hacés nada)
 
 Querés trabajar feature X   → /smart-feature checkout-flow
-                              crea src/features/, test stub, wiki/features/checkout-flow.md
+                              crea src/features/, test stub, wiki/docs/features/checkout-flow.md
 
 Vibeás                      → escribís código con Claude. Si dudás de arquitectura:
                               invocá agente architect. Si querés review: agente reviewer.

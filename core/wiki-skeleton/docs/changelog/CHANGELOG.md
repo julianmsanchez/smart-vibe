@@ -31,7 +31,7 @@ Formato libre. Sugerencia: una sección por sprint/semana/release con
 
 - **Granularidad:** una entrada por cambio significativo. No por archivo.
 - **Linkear:** cuando cierre una feature, agregar link al
-  `wiki/features/<slug>.md` y/o al `wiki/docs/session_summaries/<fecha>-<slug>.md`.
+  `wiki/docs/features/<slug>.md` y/o al `wiki/docs/session_summaries/<fecha>-<slug>.md`.
 - **ADRs:** decisiones arquitectónicas siguen yendo a `docs/decisions/`
   (raíz del proyecto). Acá referenciá la ADR, no la dupliques.
 - **Cierre de sprint/release:** mover `[Unreleased]` a una sección

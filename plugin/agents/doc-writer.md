@@ -11,7 +11,7 @@ Mantiene la documentación viva: `wiki/`, `README.md`, `ARCHITECTURE.md`, ADRs.
 
 1. Detecta cambios en código que merecen actualización de docs.
 2. Genera/actualiza:
-   - `wiki/features/<feature>.md` cuando se crea una feature.
+   - `wiki/docs/features/<feature>.md` cuando se crea una feature.
    - `wiki/architecture/<topic>.md` cuando hay decisión arquitectónica.
    - `README.md` del repo (mantiene seccion "Quickstart" + "Estructura").
    - `ARCHITECTURE.md` (alto nivel, complementa al PHS).
