@@ -1,0 +1,30 @@
+{
+  "name": "@workshop/{{TEAM_ID}}",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@workshop/api-contracts": "workspace:*",
+    "@workshop/auth": "workspace:*",
+    "@workshop/fixtures": "workspace:*",
+    "@workshop/infra-contracts": "workspace:*",
+    "@workshop/types": "workspace:*",
+    "express": "^4.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "@workshop/config": "workspace:*",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  }
+}

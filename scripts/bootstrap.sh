@@ -391,9 +391,21 @@ if [[ "$TYPE" == "workshop" ]]; then
     echo "    rollback_owner: shell"
   } > "$TARGET_DIR/workshop.yaml"
 
-  # Crear apps/<team>/ desde _team-template
+  # Crear apps/<team>/ desde _team-template y sed {{TEAM_ID}} en files que el
+  # template del team referencia (package.json + src/**). El render genérico
+  # de .tmpl ya corrió arriba (línea ~316), así que estos files llegan con
+  # `{{TEAM_ID}}` literal y se resuelven per-team acá. PORT base 3001 + index.
+  port=3001
   for t in "${TEAM_ARR[@]}"; do
     cp -r "$TARGET_DIR/apps/_team-template" "$TARGET_DIR/apps/$t"
+    while IFS= read -r -d '' f; do
+      sed -i.bak \
+        -e "s|{{TEAM_ID}}|$t|g" \
+        -e "s|{{TEAM_PORT}}|$port|g" \
+        "$f"
+      rm -f "$f.bak"
+    done < <(find "$TARGET_DIR/apps/$t" -type f \( -name 'package.json' -o -name '*.ts' -o -name 'README.md' \) -print0)
+    port=$((port + 1))
   done
 
   # Render apps/<team>/CLAUDE.md desde el stash.

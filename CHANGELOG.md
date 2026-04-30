@@ -7,7 +7,43 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
-(sin cambios desde v0.2.1)
+(sin cambios desde v0.2.2)
+
+---
+
+## [0.2.2] — 2026-04-30
+
+Bug-fix release post-dogfood real-world test. Finding BLOCKER #12: el
+`apps/_team-template/` era placeholder vacío (sólo `README.md` +
+`.env.local.example`). Workshops recién bootstrapeados producían teams
+no-funcionales: sin `package.json`, sin `tsconfig.json`, sin `src/`. `pnpm
+install` corría OK pero `pnpm --filter @workshop/<team> dev` fallaba con
+"missing script: dev".
+
+### Fixed
+- `feat(addons/workshop)` — `apps/_team-template/` ahora trae skeleton
+  Express+TS funcional: `package.json.tmpl` (deps a `@workshop/*` packages +
+  express + zod, scripts dev/build/lint/typecheck/test), `tsconfig.json`
+  (extiende `@workshop/config/tsconfig`), `.eslintrc.cjs` (extiende
+  `eslint-base`), `src/index.ts.tmpl` (Express con prefix `/api/{{TEAM_ID}}`,
+  middleware de correlation header, GET base + GET /health), `src/routes/
+  health.ts` (router con tipo explícito para evitar TS2742). `bootstrap.sh`
+  asigna puertos secuenciales (3001+) por team via `{{TEAM_PORT}}`. Cierra
+  dogfood finding #12.
+- `fix(addons/workshop)` — `pnpm-workspace.yaml.tmpl` excluye `apps/_*` para
+  que pnpm no intente instalar `_team-template/` (que conserva placeholders
+  literales `{{TEAM_ID}}` en su `package.json` post-render global).
+- `fix(scripts)` — `bootstrap.sh` per-team loop: tras `cp -r _team-template
+  apps/<team>`, recorre los archivos `package.json`, `*.ts`, `README.md` y
+  sed-substituye `{{TEAM_ID}}` y `{{TEAM_PORT}}` (inicia en 3001, +1 por team).
+
+### Verificación
+- `pnpm install` ok (415 packages, 11 workspaces — `_team-template` excluido).
+- `pnpm --filter @workshop/alpha typecheck` ok.
+- `pnpm --filter @workshop/alpha lint` ok.
+- `pnpm --filter @workshop/alpha dev` arranca; `curl :3001/api/alpha/health`
+  → `{"status":"ok","uptime":3.12}`; `curl :3001/api/alpha` → `{"team":"alpha","status":"ok"}`.
+- `bash scripts/doctor.sh` reporta 4 warns esperados (apis_external/storage/members/domain) + 1 warn tests, 0 warns inesperados.
 
 ---
 

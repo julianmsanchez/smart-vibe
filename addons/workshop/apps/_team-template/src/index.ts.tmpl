@@ -1,0 +1,40 @@
+/**
+ * Entry point del team `{{TEAM_ID}}`.
+ *
+ * Expone un Express bajo el prefix `/api/{{TEAM_ID}}` declarado en
+ * `workshop.yaml.teams[].api_prefix`. Por defecto escucha en
+ * `process.env.PORT` o en 3001 si no está definido.
+ *
+ * Convención: cada team escucha en un puerto distinto (3001, 3002, ...) y
+ * el `apps/shell/` los proxy-ea o los expone vía rewrites de Next.
+ */
+
+import express, { Request, Response } from 'express';
+import { healthRouter } from './routes/health.js';
+
+const TEAM_ID = '{{TEAM_ID}}';
+const API_PREFIX = `/api/${TEAM_ID}`;
+const PORT = Number(process.env.PORT ?? {{TEAM_PORT}});
+
+const app = express();
+
+app.use(express.json());
+
+// Correlation header passthrough — declarado en
+// workshop.yaml.shared_infra.observability.correlation_header.
+app.use((req, _res, next) => {
+  const correlationId = req.header('x-correlation-id') ?? crypto.randomUUID();
+  (req as Request & { correlationId: string }).correlationId = correlationId;
+  next();
+});
+
+app.use(`${API_PREFIX}/health`, healthRouter);
+
+app.get(API_PREFIX, (_req: Request, res: Response) => {
+  res.json({ team: TEAM_ID, status: 'ok' });
+});
+
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`[${TEAM_ID}] listening on http://localhost:${PORT}${API_PREFIX}`);
+});

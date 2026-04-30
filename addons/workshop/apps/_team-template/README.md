@@ -36,4 +36,26 @@ Cada team es esencialmente un proyecto `addon: node-ts` standalone:
 - pnpm-workspace.yaml puede usar `apps/[!_]*` si el orchestrador lo necesita ignorar.
 - Turbo lo skippea con un filter explícito.
 
-> **TODO Bloque F-base commit 56:** este README es placeholder. El template real (con `package.json.tmpl`, `tsconfig.json`, `src/` estructura mínima) se completa cuando el bootstrap lo necesite. Ver `~/.claude/plans/parsed-chasing-boole.md`.
+## Estructura mínima (v0.2.2)
+
+```
+_team-template/
+├── package.json.tmpl        # name @workshop/{{TEAM_ID}}, deps a @workshop/*
+├── tsconfig.json            # extends @workshop/config/tsconfig
+├── .eslintrc.cjs            # extends @workshop/config/eslint-base
+├── .env.local.example       # vars team-specific (synceadas desde workshop.yaml)
+├── README.md                # este archivo
+└── src/
+    ├── index.ts.tmpl        # Express en /api/{{TEAM_ID}}, puerto {{TEAM_PORT}}
+    └── routes/
+        └── health.ts        # GET /api/{{TEAM_ID}}/health
+```
+
+`bootstrap.sh` copia este árbol a `apps/<team>/`, renderiza los `.tmpl` con
+`{{TEAM_ID}}` y `{{TEAM_PORT}}` (3001+ secuencial), y borra `_team-template/`
+implícitamente porque ya no se referencia (`pnpm-workspace.yaml` filtra `apps/*`
+sin el guion bajo, y `apps/_team-template/` queda como referencia para
+`/smart-workshop add-team`).
+
+> Si el workshop crece (más routes, fixtures propios, schemas Zod del team),
+> el equipo extiende a partir de este skeleton sin tocar `_team-template/`.
