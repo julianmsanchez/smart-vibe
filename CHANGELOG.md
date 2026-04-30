@@ -7,13 +7,23 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
-### Fixed (v0.2.1 dogfood)
+(sin cambios desde v0.2.1)
+
+---
+
+## [0.2.1] — 2026-04-30
+
+Bug-fix release post-dogfood del workshop addon. 6 findings BLOCKER/WARN-ALTO
+encontrados al ejecutar una mini-feature real (variante `gradient` del Button
+con tokens Sugar Valley) sobre un workshop fresh-bootstrapped.
+
+### Fixed
 - `fix(templates)` — `core/templates/CLAUDE.md.tmpl` reescrito con marcadores explícitos `<!-- IF-WORKSHOP -->` / `<!-- IF-SINGLE-TEAM -->`. Antes: 4 bloques `<!-- WORKSHOP-ONLY -->` quedaban comentados en el rendered aunque `type=workshop` (workshops recibían comandos single-team y diagrama del repo equivocado). `scripts/bootstrap.sh` ahora ejecuta `strip_conditional_blocks` post-render para mantener sólo el bloque que matchea el `--type`. Cierra dogfood findings #1, #3, #4.
 - `fix(wiki-skeleton)` — `RESUME.md.tmpl` y `Home.md.tmpl` con paths relativos correctos para layout nested (`<repo>/wiki/`). Antes apuntaban a `../{{PROJECT_NAME}}/...` (layout parallel) → 5 paths rotos en cada workshop generado. Ahora `cd ..`, `../docs/decisions/`, `../README.md`, `../phs.yaml`. Cierra dogfood finding #2.
 - `fix(addons/workshop)` — `ORGANIZER-CHECKLIST.md.tmpl:63` ya no renderiza `apps/<team1,team2>/CLAUDE.md` (path inexistente). Texto cambiado a `apps/<team>/CLAUDE.md` genérico, con la lista de teams (`{{TEAMS_LIST}}`) movida a una línea explícita debajo. Cierra dogfood finding #5.
 - `docs(decisions)` — ADR `0008-feature-specs-path.md` formaliza `wiki/docs/features/` como path canónico (estaba en conflicto con 6+ refs a `wiki/features/` en plugin/commands y agents). Actualizadas: `plugin/commands/{smart-feature,smart-close-feature,smart-teleport,smart-implementation-log}.md`, `plugin/agents/doc-writer.md`, `core/playbooks/04-no-readme.md`, `core/wiki-skeleton/docs/changelog/CHANGELOG.md`, `docs/USER-GUIDE.md`. Cierra dogfood finding #6.
 
-### Added
+### Added (Fase 1 closeout, pre-v0.2.1)
 - `docs(user-guide)` — `docs/USER-GUIDE.md` nuevo: manual de uso de las herramientas que `smart-vibe` instala en el proyecto del builder. Cubre workflow día-a-día, slash commands (10), agentes (5), scripts (4), decisiones de documentación (ADR vs implementation_log vs session_summary), variables de entorno y FAQ. Linkea a las specs por archivo en `plugin/commands/` y `plugin/agents/`.
 - `docs(index)` — `docs/README.md` nuevo: índice de la documentación del repo, separa lo del builder (QUICKSTART, USER-GUIDE) de lo del maintainer (PHASES, decisions, framework). Cierra gap menor del plan maestro.
 - `docs(addons)` — `addons/README.md` nuevo: índice y comparativa de los dos addons (`node-ts` single-team y `workshop` multi-team). Cierra gap menor del plan maestro.
@@ -22,6 +32,7 @@ Versionado [SemVer](https://semver.org/lang/es/).
 ### Changed
 - `docs(readme)` — sección "Qué te queda en el proyecto generado" con listado de slash commands, agentes y scripts. Link directo a `docs/USER-GUIDE.md` para detalles. Status badge actualizado de "pre-release" a "v0.2.0" con link al `CHANGELOG.md` (cierra drift: el README decía "camino a v0.1.0" cuando ya estamos en v0.2.0).
 - `docs(phases)` — los 4 gaps menores listados en Fase 1 quedan marcados como cerrados; sin gaps abiertos a fecha 2026-04-29.
+- `chore(gitignore)` — agregado patrón `.dogfooding-*.md` para notas locales por sesión.
 
 ---
 

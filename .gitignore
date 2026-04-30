@@ -50,3 +50,6 @@ Desktop.ini
 
 # Claude Code (workspace-local overrides; no checked in)
 .claude/settings.local.json
+
+# Dogfood / sandbox notes (locales por sesión; no checked in)
+.dogfooding-*.md
