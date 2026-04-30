@@ -43,9 +43,11 @@
 ### Gaps menores conocidos (del plan maestro)
 
 - ~~`CHANGELOG.md` raíz~~ ✅ creado.
-- `docs/README.md` — índice de docs (ausente).
-- `addons/README.md` — índice de addons (ausente).
-- `core/wiki-skeleton/docs/changelog/CHANGELOG.md` — template (ausente, low priority).
+- ~~`docs/README.md` — índice de docs~~ ✅ creado.
+- ~~`addons/README.md` — índice de addons~~ ✅ creado.
+- ~~`core/wiki-skeleton/docs/changelog/CHANGELOG.md` — template~~ ✅ creado.
+
+(Sin gaps abiertos a fecha 2026-04-29.)
 
 ---
 

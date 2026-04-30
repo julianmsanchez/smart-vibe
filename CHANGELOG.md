@@ -9,9 +9,13 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ### Added
 - `docs(user-guide)` — `docs/USER-GUIDE.md` nuevo: manual de uso de las herramientas que `smart-vibe` instala en el proyecto del builder. Cubre workflow día-a-día, slash commands (10), agentes (5), scripts (4), decisiones de documentación (ADR vs implementation_log vs session_summary), variables de entorno y FAQ. Linkea a las specs por archivo en `plugin/commands/` y `plugin/agents/`.
+- `docs(index)` — `docs/README.md` nuevo: índice de la documentación del repo, separa lo del builder (QUICKSTART, USER-GUIDE) de lo del maintainer (PHASES, decisions, framework). Cierra gap menor del plan maestro.
+- `docs(addons)` — `addons/README.md` nuevo: índice y comparativa de los dos addons (`node-ts` single-team y `workshop` multi-team). Cierra gap menor del plan maestro.
+- `core(wiki-skeleton)` — `core/wiki-skeleton/docs/changelog/CHANGELOG.md` nuevo: template starter para que el builder lleve un changelog interno en su wiki, separado del `CHANGELOG.md` raíz formato Keep a Changelog. Cierra el último gap menor del plan maestro (Fase 1 al 100%).
 
 ### Changed
 - `docs(readme)` — sección "Qué te queda en el proyecto generado" con listado de slash commands, agentes y scripts. Link directo a `docs/USER-GUIDE.md` para detalles. Status badge actualizado de "pre-release" a "v0.2.0" con link al `CHANGELOG.md` (cierra drift: el README decía "camino a v0.1.0" cuando ya estamos en v0.2.0).
+- `docs(phases)` — los 4 gaps menores listados en Fase 1 quedan marcados como cerrados; sin gaps abiertos a fecha 2026-04-29.
 
 ---
 
