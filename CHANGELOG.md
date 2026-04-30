@@ -10,6 +10,7 @@ Versionado [SemVer](https://semver.org/lang/es/).
 ### Fixed (v0.2.1 dogfood)
 - `fix(templates)` — `core/templates/CLAUDE.md.tmpl` reescrito con marcadores explícitos `<!-- IF-WORKSHOP -->` / `<!-- IF-SINGLE-TEAM -->`. Antes: 4 bloques `<!-- WORKSHOP-ONLY -->` quedaban comentados en el rendered aunque `type=workshop` (workshops recibían comandos single-team y diagrama del repo equivocado). `scripts/bootstrap.sh` ahora ejecuta `strip_conditional_blocks` post-render para mantener sólo el bloque que matchea el `--type`. Cierra dogfood findings #1, #3, #4.
 - `fix(wiki-skeleton)` — `RESUME.md.tmpl` y `Home.md.tmpl` con paths relativos correctos para layout nested (`<repo>/wiki/`). Antes apuntaban a `../{{PROJECT_NAME}}/...` (layout parallel) → 5 paths rotos en cada workshop generado. Ahora `cd ..`, `../docs/decisions/`, `../README.md`, `../phs.yaml`. Cierra dogfood finding #2.
+- `fix(addons/workshop)` — `ORGANIZER-CHECKLIST.md.tmpl:63` ya no renderiza `apps/<team1,team2>/CLAUDE.md` (path inexistente). Texto cambiado a `apps/<team>/CLAUDE.md` genérico, con la lista de teams (`{{TEAMS_LIST}}`) movida a una línea explícita debajo. Cierra dogfood finding #5.
 
 ### Added
 - `docs(user-guide)` — `docs/USER-GUIDE.md` nuevo: manual de uso de las herramientas que `smart-vibe` instala en el proyecto del builder. Cubre workflow día-a-día, slash commands (10), agentes (5), scripts (4), decisiones de documentación (ADR vs implementation_log vs session_summary), variables de entorno y FAQ. Linkea a las specs por archivo en `plugin/commands/` y `plugin/agents/`.
