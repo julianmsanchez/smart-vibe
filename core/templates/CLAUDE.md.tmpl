@@ -39,10 +39,9 @@ Este proyecto tiene **un PHS** (`phs.yaml`) en la raíz. Es el contrato que decl
 - ¿Validar PHS? `bash <smart-vibe>/scripts/doctor.sh phs validate phs.yaml` o `/smart-phs validate`.
 - Cuando estés cerca de graduar, completar todos los campos críticos.
 
-<!-- WORKSHOP-ONLY: descomenta si type=workshop -->
-<!--
-**Workshop:** este proyecto vive en un monorepo. Hay un `workshop.yaml` global en la raíz del monorepo (un nivel arriba de `apps/{{TEAM_ID}}/`). El PHS de tu app referencia el workshop con `workshop.ref: ../../workshop.yaml`. Cambios cross-team van por `workshop.yaml`.
--->
+<!-- IF-WORKSHOP -->
+**Workshop:** este proyecto vive en un monorepo. Hay un `workshop.yaml` global en la raíz del monorepo que declara teams, infra compartida, secrets, observability. Cada `apps/<team>/phs.yaml` referencia ese workshop con `workshop.ref: ../../workshop.yaml`. Cambios cross-team van por `workshop.yaml`.
+<!-- /IF-WORKSHOP -->
 
 ---
 
@@ -83,6 +82,7 @@ Closes #42
 
 ---
 
+<!-- IF-SINGLE-TEAM -->
 ## Comandos importantes
 
 ```bash
@@ -101,21 +101,37 @@ cp .env.example .env       # editar con valores reales
 # Validar PHS
 {{PHS_VALIDATE_CMD}}
 ```
+<!-- /IF-SINGLE-TEAM -->
 
-<!-- WORKSHOP-ONLY -->
-<!--
-### Comandos del monorepo (workshop)
+<!-- IF-WORKSHOP -->
+## Comandos importantes (monorepo workshop)
 
 ```bash
-pnpm install                                    # desde la raíz del monorepo
-pnpm turbo dev --filter=shell --filter=...{{TEAM_ID}}   # shell + tu team
-pnpm turbo build --filter=...{{TEAM_ID}}        # solo tu team y deps
-pnpm turbo test                                 # todos los teams
+# Setup (desde la raíz del monorepo)
+{{PACKAGE_MANAGER}} install
+
+# Two-layer env: globales en .env.shared.example (raíz), team-specific en
+# apps/<team>/.env.local.example. Sincronizar desde workshop.yaml:
+bash scripts/sync-env.sh
+
+# Desarrollo (filtrar por team o levantar todo)
+{{PACKAGE_MANAGER}} turbo dev                          # todos los teams
+{{PACKAGE_MANAGER}} turbo dev --filter=apps/<team>     # un solo team
+{{PACKAGE_MANAGER}} turbo build
+{{PACKAGE_MANAGER}} turbo test                         # cross-team
+{{PACKAGE_MANAGER}} turbo lint
+
+# Validar PHS + workshop.yaml
+{{PHS_VALIDATE_CMD}}
+bash scripts/doctor.sh workshop validate workshop.yaml
 ```
--->
+
+> Cada team tiene su propio `apps/<team>/CLAUDE.md` con comandos y reglas específicas. Este `CLAUDE.md` raíz es la constitución cross-cutting.
+<!-- /IF-WORKSHOP -->
 
 ---
 
+<!-- IF-SINGLE-TEAM -->
 ## Estructura del repo
 
 ```
@@ -135,11 +151,34 @@ pnpm turbo test                                 # todos los teams
 │   └── runbooks/         # solo cuando entres a graduating
 └── ...
 ```
+<!-- /IF-SINGLE-TEAM -->
 
-<!-- WORKSHOP-ONLY -->
-<!--
-En workshop, tu app vive en `apps/{{TEAM_ID}}/`. La estructura arriba aplica a esa carpeta. La raíz del monorepo tiene `workshop.yaml`, `apps/`, `packages/` y `docs/workshop/`.
--->
+<!-- IF-WORKSHOP -->
+## Estructura del repo (monorepo workshop)
+
+```
+{{PROJECT_NAME}}/
+├── workshop.yaml             # SSOT cross-cutting (teams, infra, secrets, ...)
+├── phs.yaml                  # PHS a nivel monorepo (referencia teams)
+├── README.md
+├── CLAUDE.md                 # este archivo (constitución cross-cutting)
+├── ORGANIZER-CHECKLIST.md    # checklist post-bootstrap del organizer
+├── .env.shared.example       # capa global de env (commiteada)
+├── package.json + pnpm-workspace.yaml + turbo.json
+├── apps/
+│   ├── shell/                # Next.js shell que ensambla los teams
+│   └── <team-id>/            # un app por team
+│       ├── CLAUDE.md         # constitución del team
+│       ├── phs.yaml          # PHS del team (workshop.ref: ../../workshop.yaml)
+│       └── .env.local.example
+├── packages/                 # cross-cutting (api-contracts, design-system, ...)
+├── docs/
+│   ├── decisions/            # ADRs cross-cutting (los del team van en apps/<team>/docs/)
+│   ├── policies/             # 7 policies (modo vibe)
+│   └── workshop/             # decisiones cross-cutting (DB, secrets, versioning, ...)
+└── wiki/                     # narrativa del workshop (RESUME, ROADMAP, features, ...)
+```
+<!-- /IF-WORKSHOP -->
 
 ---
 
@@ -183,17 +222,17 @@ Para cambios estructurales (nueva dependencia mayor, refactor grande, cambio de 
 
 ---
 
-<!-- WORKSHOP-ONLY -->
-<!--
+<!-- IF-WORKSHOP -->
 ## Como team del workshop
 
-- Tu app es independiente operativamente, pero **comparte tooling, types, design-system y auth** con los otros teams.
+- Cada team es independiente operativamente, pero **comparte tooling, types, design-system y auth** con los otros teams.
 - Cambios a packages compartidos (`@workshop/design-system`, `@workshop/types`, etc.) van por **PR único** que actualiza package + consumidores.
-- Si tenés que cambiar algo en infra compartida (DB, secrets, observability), editá `workshop.yaml` y avisá a los otros teams.
+- Si hay que cambiar algo en infra compartida (DB, secrets, observability), editar `workshop.yaml` y avisar a los otros teams.
 - Comunicación cross-team: HTTP via `@workshop/api-contracts`. NO importes directo de otra app.
--->
 
 ---
+
+<!-- /IF-WORKSHOP -->
 
 ## Cosas que NO hacemos en este repo
 
@@ -206,4 +245,4 @@ Para cambios estructurales (nueva dependencia mayor, refactor grande, cambio de 
 ---
 
 > Generado por `bash scripts/bootstrap.sh` de smart-vibe {{SMART_VIBE_VERSION}}.
-> Editá libremente. Si querés mantener el archivo cerca del template original, no toques las secciones marcadas con `<!-- WORKSHOP-ONLY -->`.
+> Editá libremente. Las secciones condicionales del template (workshop vs single-team) ya fueron resueltas durante el bootstrap; este archivo no contiene marcadores `IF-*`.

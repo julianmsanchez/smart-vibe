@@ -7,6 +7,9 @@ Versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Fixed (v0.2.1 dogfood)
+- `fix(templates)` — `core/templates/CLAUDE.md.tmpl` reescrito con marcadores explícitos `<!-- IF-WORKSHOP -->` / `<!-- IF-SINGLE-TEAM -->`. Antes: 4 bloques `<!-- WORKSHOP-ONLY -->` quedaban comentados en el rendered aunque `type=workshop` (workshops recibían comandos single-team y diagrama del repo equivocado). `scripts/bootstrap.sh` ahora ejecuta `strip_conditional_blocks` post-render para mantener sólo el bloque que matchea el `--type`. Cierra dogfood findings #1, #3, #4.
+
 ### Added
 - `docs(user-guide)` — `docs/USER-GUIDE.md` nuevo: manual de uso de las herramientas que `smart-vibe` instala en el proyecto del builder. Cubre workflow día-a-día, slash commands (10), agentes (5), scripts (4), decisiones de documentación (ADR vs implementation_log vs session_summary), variables de entorno y FAQ. Linkea a las specs por archivo en `plugin/commands/` y `plugin/agents/`.
 - `docs(index)` — `docs/README.md` nuevo: índice de la documentación del repo, separa lo del builder (QUICKSTART, USER-GUIDE) de lo del maintainer (PHASES, decisions, framework). Cierra gap menor del plan maestro.

@@ -183,10 +183,38 @@ render_tmpl() {
     "$src" > "$dst"
 }
 
+# --- helper: strip conditional blocks ---
+# Procesa marcadores HTML-comment <!-- IF-WORKSHOP --> ... <!-- /IF-WORKSHOP -->
+# y <!-- IF-SINGLE-TEAM --> ... <!-- /IF-SINGLE-TEAM --> según TYPE. Mantiene
+# el bloque que matchea el TYPE actual y borra el otro junto con sus marcadores.
+# Colapsa también runs de >2 newlines a 2 para evitar gaps grandes en el output.
+# Idempotente: si el archivo no tiene marcadores, no hace nada.
+strip_conditional_blocks() {
+  local file="$1" type="$2"
+  python3 - "$file" "$type" <<'PY'
+import sys, re
+path, type_ = sys.argv[1], sys.argv[2]
+with open(path, 'r', encoding='utf-8') as f:
+    content = f.read()
+if type_ == "workshop":
+    content = re.sub(r'<!-- IF-SINGLE-TEAM -->.*?<!-- /IF-SINGLE-TEAM -->\n?', '', content, flags=re.DOTALL)
+    content = re.sub(r'<!-- IF-WORKSHOP -->\n?', '', content)
+    content = re.sub(r'<!-- /IF-WORKSHOP -->\n?', '', content)
+else:
+    content = re.sub(r'<!-- IF-WORKSHOP -->.*?<!-- /IF-WORKSHOP -->\n?', '', content, flags=re.DOTALL)
+    content = re.sub(r'<!-- IF-SINGLE-TEAM -->\n?', '', content)
+    content = re.sub(r'<!-- /IF-SINGLE-TEAM -->\n?', '', content)
+content = re.sub(r'\n{3,}', '\n\n', content)
+with open(path, 'w', encoding='utf-8') as f:
+    f.write(content)
+PY
+}
+
 # --- copiar templates base ---
 echo "→ Copiando templates base..."
 
 render_tmpl "$REPO_ROOT/core/templates/CLAUDE.md.tmpl" "$TARGET_DIR/CLAUDE.md"
+strip_conditional_blocks "$TARGET_DIR/CLAUDE.md" "$TYPE"
 render_tmpl "$REPO_ROOT/core/gitignore.tmpl" "$TARGET_DIR/.gitignore"
 cp -r "$REPO_ROOT/core/wiki-skeleton" "$TARGET_DIR/wiki"
 mkdir -p "$TARGET_DIR/docs"
